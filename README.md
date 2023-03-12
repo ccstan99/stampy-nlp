@@ -44,19 +44,19 @@ https://stampy-nlp-t6p37v2uia-uw.a.run.app/api/search?query=What+AI+safety%3F&sh
 `showLive=0` returns entries where `status != "Live on site"`
 
 ```bash
-https://stampy-nlp-t6p37v2uia-uw.a.run.app/api/search?query=What+AI+safety%3F&showLive=0  
+https://stampy-nlp-t6p37v2uia-uw.a.run.app/api/search?query=What+AI+safety%3F&showLive=0
 ```
 
 `status=all` returns all questions regardless of status
 
 ```bash
-https://stampy-nlp-t6p37v2uia-uw.a.run.app/api/search?query=Something+random%3F&status=all  
+https://stampy-nlp-t6p37v2uia-uw.a.run.app/api/search?query=Something+random%3F&status=all
 ```
 
 `status=value` returns entries with status matching whatever value is specified. Multiple values may be listed separately. The example below returns entries with `status == "Not started"` and also `status == "In progress"`
 
 ```bash
-https://stampy-nlp-t6p37v2uia-uw.a.run.app/api/search?query=Something+random%3F&status=Not%20started&status=In%20progress 
+https://stampy-nlp-t6p37v2uia-uw.a.run.app/api/search?query=Something+random%3F&status=Not%20started&status=In%20progress
 ```
 
 ## 2. [Duplicates Report](https://nlp.stampy.ai/duplicates)
@@ -85,7 +85,9 @@ https://nlp.stampy.ai/api/extract?query=What+AI+safety%3F
 
 # Setup Environment
 
-Obtain free API tokens for Coda, Pincecone, Hugging Face and set the environment variables below with their values.
+## API tokens
+
+Obtain free API tokens for [Coda](https://coda.io/account), [Pinecone](https://app.pinecone.io), [Hugging Face](https://huggingface.co/settings/tokens) and set the environment variables below with their values, or even better, create an `.env` file with them.
 
 ```text
 CODA_TOKEN=
@@ -93,9 +95,19 @@ PINECONE_API_KEY=
 HUGGINGFACE_API_KEY=
 ```
 
+### Coda
+
+The Stampy Coda table is `https://coda.io/d/_dfau7sl2hmG`
+
+### Pinecone
+
+When creating a Pinecone project, make sure that the environment is set to us-west1-gcp
+
 ## Install [Git Large File Storage](https://git-lfs.com)
 
-After clone this repo, the large Transformer models must be downloaded separately using `git lfs`.
+After cloning this repo, the large Transformer models must be downloaded separately using `git lfs`.
+
+### Linux
 
 ```bash
 curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | sudo bash
@@ -103,10 +115,15 @@ sudo apt-get install git-lfs
 git lfs install
 ```
 
+### MacOS
+
+    brew install git-lfs
+
 ## Install Google [Cloud SDK](https://cloud.google.com/sdk/docs/install)
 
 Google Cloud SDK will be needed if you plan to upload generated files to Cloud bucket.
 
+### Linux
 ```bash
 echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main" | sudo tee -a /etc/apt/sources.list.d/google-cloud-sdk.list
 curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key --keyring /usr/share/keyrings/cloud.google.gpg add -
@@ -114,6 +131,19 @@ sudo apt-get update && sudo apt-get install google-cloud-cli
 gcloud init
 gcloud auth login --no-launch-browser
 ```
+
+### MacOS
+
+    brew install --cask google-cloud-sdk
+    gcloud init
+
+## Install requirements
+
+0. (Optional, but recommended) Create a virtualenv - pytorch doesn't always support the newest python versions, so you might need to check [here](https://download.pytorch.org/whl/torch_stable.html) whether there will be a compatible version. TL;DR; - if you get an `Could not find a version that satisfies the requirement torch`, try downgrading the python version
+1. `pip install -r requirements.txt`
+
+## Start the server
+
 
 # Files Overview
 
@@ -157,4 +187,3 @@ chmod +x *.sh
 ./setup.sh
 python3 main.py
 ./deploy.sh
-```
