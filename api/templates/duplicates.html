@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title>AI Safety Info - Duplicates Report</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/template.css') }}"/>
+  </head>
+
+  <body>
+    {% extends "template.html" %}
+    {% block content %}
+    <div style="width:100%; padding:5px" >
+  
+    <h2 id="title">Duplicates Report</h2>
+    <table>
+      <tr>
+        <th>Score</th>
+        <th>Entry 1</th>
+        <th>Entry 2</th>
+      </tr>
+      {% for item in results %}
+      <tr>
+        <td class="score">({{ '{0:.2f}'.format(item.score) }})</td>
+        <td class="entry"><a href="{{ item.entry1.url }}" target="_blank">{{ item.entry1.title }}</a></td>
+        <td class="entry"><a href="{{ item.entry2.url }}" target="_blank">{{ item.entry2.title }}</a></td>
+      </tr>
+      {% endfor %}
+    </table>
+
+  {% endblock %}  
+  </body>
+</html>

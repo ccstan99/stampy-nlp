@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title>Flask Parent Template</title>
+
+    <!-- link rel="stylesheet" href="{{ url_for('static', filename='css/template.css') }}" -->
+
+  </head>
+  <body>
+    <header>
+        <h1><a href="https://aisafety.info/" id="logo">aisafety.info</a></h1>
+        <nav>
+          <ul>
+            <li><a href="{{ url_for('search_html') }}">Semantic Search</a></li>
+            <li><a href="{{ url_for('duplicates_html') }}">Find Duplicates</a></li>
+            <li><a href="{{ url_for('literature_html') }}">Literature Abstracts</a></li>
+            <li><a href="{{ url_for('extract_html') }}">Extract QA</a></li>
+          </ul>
+        </nav>
+    </header>
+
+    {% block content %}
+    {% endblock %}
+  </body>
+</html>

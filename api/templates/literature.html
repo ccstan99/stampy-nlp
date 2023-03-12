@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title>AI Safety Info - Search Literature Abstracts & Summaries</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/template.css') }}"/>
+  </head>
+
+  <body>
+    {% extends "template.html" %}
+    {% block content %}
+    <div style="width:100%; padding:5px" >
+  
+    <h2 id="title">Search Literature Abstracts & Summaries</h2>
+    <p id="status"></p>
+      <input type="search" id="query" name="question" value="{{ query }}">
+      <div id="results" class="dropdown-content show">
+        {% for item in results %}
+        <a href="{{ item.url }}" target="_blank"><h3>{{ item.title }}</h3>({{ '{0:.2f}'.format(item.score) }}) {{ item.abstract }}</a>
+        {% endfor %}
+      </div>
+    </div>
+  
+    </body>
+    <script>
+      const TITLE = document.getElementById('title');
+      const STATUS = document.getElementById('status');
+      const QUERY = document.getElementById('query');
+      const RESULTS = document.getElementById('results');
+      const ANCHORS = RESULTS.getElementsByTagName('a');
+      const QUERY_URL = "/api/literature?query="
+
+      QUERY.addEventListener('keyup', search);
+
+      async function search(e)
+      {
+        STATUS.innerText = "";
+        
+        if (e.key === 'Enter' || e.keyCode === 13) {
+          apicall = QUERY_URL + encodeURIComponent(QUERY.value);
+          console.log("get", apicall);
+          let f = await fetch(apicall);
+          let text = await f.text();
+          response = JSON.parse(text);
+          console.log("response", response);
+
+          let k = 5
+          // print top k results
+          for (let i = 0; i < k; i++)
+          {
+            ANCHORS[i].href = response[i]["url"]
+            ANCHORS[i].innerHTML =
+            `<h3>${response[i]["title"]}</h3>(${response[i]["score"].toFixed(2)}) ${response[i]["abstract"]}`
+          }
+        }
+      }
+    </script>
+    {% endblock %}
+</html>

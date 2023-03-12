@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title>AI Safety Info - Extract Answers from Literature</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/template.css') }}"/>
+  </head>
+
+  <body>
+    {% extends "template.html" %}
+    {% block content %}
+    <div style="width:100%; padding:5px" >
+  
+    <h2 id="title">Extract Answers from Literature</h2>
+    <p id="status"></p>
+      <input type="search" id="query" name="question" value="{{ query }}">
+      <div id="results" class="dropdown-content show">
+        {% for item in results %}
+          <a href="{{ item.url }}" target="_blank"><h3>{{ item.title }}</h3>({{ '{0:.2f}'.format(item.score) }})
+          {{ item.context[:item.start] }}<span class="highlight">{{ item.answer }}</span>{{ item.context[item.end:] }}</a>
+        {% endfor %}
+      </div>
+    </div>
+  
+    </body>
+    <script>
+      const TITLE = document.getElementById('title');
+      const STATUS = document.getElementById('status');
+      const QUERY = document.getElementById('query');
+      const RESULTS = document.getElementById('results');
+      const ANCHORS = RESULTS.getElementsByTagName('a');
+      const QUERY_URL = "/api/extract?query="
+
+      QUERY.addEventListener('keyup', search);
+
+      async function search(e)
+      {
+        STATUS.innerText = "";
+
+        if (e.key === 'Enter' || e.keyCode === 13) {
+          apicall = QUERY_URL + encodeURIComponent(QUERY.value);
+          console.log("get", apicall);
+
+          let f = await fetch(apicall);
+          let text = await f.text();
+          response = JSON.parse(text);
+          console.log("response", response);
+
+          let k = response.length
+          RESULTS.innerHTML = ''
+          // TODO: print top k results, restructure add as many node elems as needed
+          for (let i = 0; i < k; i++)
+          {
+            item = response[i]
+            RESULTS.innerHTML +=
+            `<a href="${item["url"]}" target="_blank">
+            <h3>${item["title"]}</h3>(${item["score"].toFixed(2)})
+            ${item["context"].substring(0, item["start"])}<span class="highlight">${item["answer"]}</span>${item["context"].substring(item["end"])}
+            </a>`
+          }
+        }
+
+      }
+    </script>
+    {% endblock %}
+</html>

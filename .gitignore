@@ -1,0 +1,12 @@
+credentials.json
+stampy-*.json
+models
+node_modules
+*.bin
+*.pyc
+__pycache__
+node_modules
+.DS_Store
+.git
+secrets.sh
+venv

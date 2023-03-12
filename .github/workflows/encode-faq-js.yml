@@ -1,0 +1,60 @@
+name: Generate TensorFlow.js Encodings
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "* 0 * * *"
+env:
+  FILEPATH: ./encode-faq-js/
+  FILENAME: stampy-encodings.json
+  PROJECT_NUM: 507517956350
+  PROJECT_ID: stampy-nlp
+  BUCKET_ID: stampy-nlp-resources
+  ID_POOL: stampy-pool
+  ID_PROVIDER: stampy-provider
+jobs:
+  encode-faq-js:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+    steps:
+    - name: Clone Repository Code
+      id: 'checkout'
+      uses: 'actions/checkout@v3'
+      with:
+        persist-credentials: false # otherwise, the token used is the GITHUB_TOKEN, instead of your personal access token.
+        fetch-depth: 0 # otherwise, there would be errors pushing refs to the destination repository.
+
+    - name: Generate FAQ Encodings for TensorFlow.js
+      id: generate
+      run: |
+        cd ${{ env.FILEPATH }}
+        npm install node-fetch @tensorflow/tfjs-node@4.1.0 @tensorflow-models/universal-sentence-encoder
+        node encode-faq.mjs ${{ secrets.CODA_TOKEN }}
+
+    - name: 'Authenticate to Google Cloud'
+      id: 'auth'
+      uses: 'google-github-actions/auth@v1'
+      with:
+        credentials_json: '${{ secrets.GCP_CREDENTIALS }}'
+        # workload_identity_provider: 'projects/${{ env.PROJECT_NUM }}/locations/global/workloadIdentityPools/${{ env.ID_POOL }}/providers/${{ env.ID_PROVIDER }}'
+        # service_account: 'service@${{ env.PROJECT_ID }}.iam.gserviceaccount.com'
+        # token_format: 'access_token'
+
+    - name: 'Setup Cloud SDK'
+      uses: 'google-github-actions/setup-gcloud@v1'
+      with:
+        version: '>= 400.0.0'
+
+    - name: 'Debugging Info with Cloud CLI'
+      run: |
+        gcloud info
+        gcloud auth list
+        gcloud config list
+          
+    - name: 'Upload TFJS Encodings JSON to Cloud Bucket'
+      id: 'upload-file'
+      uses: 'google-github-actions/upload-cloud-storage@v1'
+      with:
+        path: '${{ env.FILEPATH }}${{ env.FILENAME }}'
+        destination: '${{ env.BUCKET_ID }}'
