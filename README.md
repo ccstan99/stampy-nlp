@@ -84,25 +84,6 @@ https://nlp.stampy.ai/api/extract?query=What+AI+safety%3F
 ```
 
 # Setup Environment
-
-## API tokens
-
-Obtain free API tokens for [Coda](https://coda.io/account), [Pinecone](https://app.pinecone.io), [Hugging Face](https://huggingface.co/settings/tokens) and set the environment variables below with their values, or even better, create an `.env` file with them.
-
-```text
-CODA_TOKEN=
-PINECONE_API_KEY=
-HUGGINGFACE_API_KEY=
-```
-
-### Coda
-
-The Stampy Coda table is `https://coda.io/d/_dfau7sl2hmG`
-
-### Pinecone
-
-When creating a Pinecone project, make sure that the environment is set to us-west1-gcp
-
 ## Install [Git Large File Storage](https://git-lfs.com)
 
 After cloning this repo, the large Transformer models must be downloaded separately using `git lfs`.
@@ -119,14 +100,27 @@ git lfs install
 
     brew install git-lfs
 
-## Install requirements
+## Run the setup script
 
-0. (Optional, but recommended) Create a virtualenv - pytorch doesn't always support the newest python versions, so you might need to check [here](https://download.pytorch.org/whl/torch_stable.html) whether there will be a compatible version. TL;DR; - if you get an `Could not find a version that satisfies the requirement torch`, try downgrading the python version
-1. `pip install -e .`
-This can be done by running `./setup.sh`, which will:
-* create an appropriate virtualenv (requires Python3.8 on path)
-* download all required models
-* make sure Google Cloud is correctly configured
+    ./setup.sh
+
+If this is your first run, it will:
+* download the appropriate models from Huggingface
+* write the appropriate API keys/tokens to `.env`
+* create a virtualenv
+* install all requirements
+
+Subsequent runs will skip bits that have already been done, but it does so by simply checking whether the appropriate files exist.
+API tokens for [Coda](https://coda.io/account), [Pinecone](https://app.pinecone.io), [Hugging Face](https://huggingface.co/settings/tokens) are required,
+but the script will ask you for them.
+
+### Coda
+
+The Stampy Coda table is `https://coda.io/d/_dfau7sl2hmG`
+
+### Pinecone
+
+When creating a Pinecone project, make sure that the environment is set to us-west1-gcp
 
 # Deployment
 
