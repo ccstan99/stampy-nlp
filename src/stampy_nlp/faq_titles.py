@@ -1,7 +1,7 @@
 from sentence_transformers import SentenceTransformer, util
-import utilities.pinecone_utils as dbutils
-import utilities.coda_utils as codautils
-import utilities.huggingface_utils as hfutils
+import stampy_nlp.utilities.pinecone_utils as dbutils
+import stampy_nlp.utilities.coda_utils as codautils
+import stampy_nlp.utilities.huggingface_utils as hfutils
 import logging
 import json
 import sys
@@ -73,7 +73,7 @@ def encode_faq_titles():
     except Exception as e:
         logging.error("Failed upload_data to pinecone")
         raise(e)
-    
+
     return duplicates
 
 

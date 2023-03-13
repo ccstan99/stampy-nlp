@@ -44,19 +44,19 @@ https://stampy-nlp-t6p37v2uia-uw.a.run.app/api/search?query=What+AI+safety%3F&sh
 `showLive=0` returns entries where `status != "Live on site"`
 
 ```bash
-https://stampy-nlp-t6p37v2uia-uw.a.run.app/api/search?query=What+AI+safety%3F&showLive=0  
+https://stampy-nlp-t6p37v2uia-uw.a.run.app/api/search?query=What+AI+safety%3F&showLive=0
 ```
 
 `status=all` returns all questions regardless of status
 
 ```bash
-https://stampy-nlp-t6p37v2uia-uw.a.run.app/api/search?query=Something+random%3F&status=all  
+https://stampy-nlp-t6p37v2uia-uw.a.run.app/api/search?query=Something+random%3F&status=all
 ```
 
 `status=value` returns entries with status matching whatever value is specified. Multiple values may be listed separately. The example below returns entries with `status == "Not started"` and also `status == "In progress"`
 
 ```bash
-https://stampy-nlp-t6p37v2uia-uw.a.run.app/api/search?query=Something+random%3F&status=Not%20started&status=In%20progress 
+https://stampy-nlp-t6p37v2uia-uw.a.run.app/api/search?query=Something+random%3F&status=Not%20started&status=In%20progress
 ```
 
 ## 2. [Duplicates Report](https://nlp.stampy.ai/duplicates)
@@ -84,18 +84,11 @@ https://nlp.stampy.ai/api/extract?query=What+AI+safety%3F
 ```
 
 # Setup Environment
-
-Obtain free API tokens for Coda, Pincecone, Hugging Face and set the environment variables below with their values.
-
-```text
-CODA_TOKEN=
-PINECONE_API_KEY=
-HUGGINGFACE_API_KEY=
-```
-
 ## Install [Git Large File Storage](https://git-lfs.com)
 
-After clone this repo, the large Transformer models must be downloaded separately using `git lfs`.
+After cloning this repo, the large Transformer models must be downloaded separately using `git lfs`.
+
+### Linux
 
 ```bash
 curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | sudo bash
@@ -103,10 +96,37 @@ sudo apt-get install git-lfs
 git lfs install
 ```
 
+### MacOS
+
+    brew install git-lfs
+
+## Run the setup script
+
+    ./setup.sh
+
+If this is your first run, it will:
+* download the appropriate models from Huggingface
+* write the appropriate API keys/tokens to `.env`
+* create a virtualenv
+* install all requirements
+
+Subsequent runs will skip bits that have already been done, but it does so by simply checking whether the appropriate files exist.
+API tokens for [Coda](https://coda.io/account), [Pinecone](https://app.pinecone.io), [Hugging Face](https://huggingface.co/settings/tokens) are required,
+but the script will ask you for them.
+
+### Coda
+
+The Stampy Coda table is `https://coda.io/d/_dfau7sl2hmG`
+
+### Pinecone
+
+When creating a Pinecone project, make sure that the environment is set to us-west1-gcp
+
+# Deployment
+
 ## Install Google [Cloud SDK](https://cloud.google.com/sdk/docs/install)
 
-Google Cloud SDK will be needed if you plan to upload generated files to Cloud bucket.
-
+### Linux
 ```bash
 echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main" | sudo tee -a /etc/apt/sources.list.d/google-cloud-sdk.list
 curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key --keyring /usr/share/keyrings/cloud.google.gpg add -
@@ -114,6 +134,25 @@ sudo apt-get update && sudo apt-get install google-cloud-cli
 gcloud init
 gcloud auth login --no-launch-browser
 ```
+
+### MacOS
+
+    brew install --cask google-cloud-sdk
+    gcloud init
+
+## Setup Docker
+
+1. Install [Docker](https://docs.docker.com/get-docker/)
+2. Authenticate Docker to Google Cloud: `gcloud auth configure-docker`
+
+One thing worth remembering here is that Google Cloud Run containers assume that they'll get a Linux x64 image. The
+deployment scripts should generate appropriate images, but it might be an issue if your deployments don't want to work
+and you're not on a Linux x64 system
+
+## Deploy to Google [Cloud Run](https://cloud.google.com/sdk/gcloud/reference/beta/run/deploy)
+
+    ./deploy.sh
+
 
 # Files Overview
 
@@ -149,12 +188,3 @@ At the moment pinecone is free up to 1 million vectors, of which we are using ~4
 ## 4. Clean Up Code
 
 Before all the above... The messy code needs to be cleaned up & refactored before getting others to contribute. I'm always open to suggestions in general!
-
-# Deploy to Google [Cloud Run](https://cloud.google.com/sdk/gcloud/reference/beta/run/deploy)
-
-```zsh
-chmod +x *.sh
-./setup.sh
-python3 main.py
-./deploy.sh
-```

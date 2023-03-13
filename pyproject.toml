@@ -1,0 +1,24 @@
+[build-system]
+requires = ["setuptools>=45", "setuptools_scm[toml]>=6.2"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "stampy_nlp"
+dynamic = ["version"]
+authors = [
+    {name = "ccstan99", email = "hello@stampy.ai"},
+    {name = "Daniel O'Connell", email = "github@ahiru.pl"},
+]
+description = "Stampy NLP performs semantic search and other NLP microservices for aisafety.info and stampy.ai, a database of questions and answers about AGI safety"
+readme = "README.md"
+requires-python = ">=3.8"
+license = {text = "MIT"}
+dependencies = [
+    "Flask",
+    "gunicorn",
+    "pandas",
+    "pinecone-client",
+    "sentence-transformers",
+    "torch",
+    "transformers",
+]

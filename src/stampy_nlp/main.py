@@ -1,11 +1,11 @@
-from flask import Flask, render_template, jsonify, request
-import utilities.pinecone_utils as dbutils
-import utilities.huggingface_utils as hfutils
-import utilities.coda_utils as codautils
-from faq_titles import encode_faq_titles
 import logging
 import requests
 import urllib
+from flask import Flask, render_template, jsonify, request
+import stampy_nlp.utilities.pinecone_utils as dbutils
+import stampy_nlp.utilities.huggingface_utils as hfutils
+import stampy_nlp.utilities.coda_utils as codautils
+from stampy_nlp.faq_titles import encode_faq_titles
 
 app = Flask(__name__)
 
