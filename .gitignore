@@ -11,3 +11,5 @@ node_modules
 secrets.sh
 venv
 .env
+*.egg-info/
+build/

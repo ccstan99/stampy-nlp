@@ -119,9 +119,18 @@ git lfs install
 
     brew install git-lfs
 
-## Install Google [Cloud SDK](https://cloud.google.com/sdk/docs/install)
+## Install requirements
 
-Google Cloud SDK will be needed if you plan to upload generated files to Cloud bucket.
+0. (Optional, but recommended) Create a virtualenv - pytorch doesn't always support the newest python versions, so you might need to check [here](https://download.pytorch.org/whl/torch_stable.html) whether there will be a compatible version. TL;DR; - if you get an `Could not find a version that satisfies the requirement torch`, try downgrading the python version
+1. `pip install -e .`
+This can be done by running `./setup.sh`, which will:
+* create an appropriate virtualenv (requires Python3.8 on path)
+* download all required models
+* make sure Google Cloud is correctly configured
+
+# Deployment
+
+## Install Google [Cloud SDK](https://cloud.google.com/sdk/docs/install)
 
 ### Linux
 ```bash
@@ -137,12 +146,18 @@ gcloud auth login --no-launch-browser
     brew install --cask google-cloud-sdk
     gcloud init
 
-## Install requirements
+## Setup Docker
 
-0. (Optional, but recommended) Create a virtualenv - pytorch doesn't always support the newest python versions, so you might need to check [here](https://download.pytorch.org/whl/torch_stable.html) whether there will be a compatible version. TL;DR; - if you get an `Could not find a version that satisfies the requirement torch`, try downgrading the python version
-1. `pip install -r requirements.txt`
+1. Install [Docker](https://docs.docker.com/get-docker/)
+2. Authenticate Docker to Google Cloud: `gcloud auth configure-docker`
 
-## Start the server
+One thing worth remembering here is that Google Cloud Run containers assume that they'll get a Linux x64 image. The
+deployment scripts should generate appropriate images, but it might be an issue if your deployments don't want to work
+and you're not on a Linux x64 system
+
+## Deploy to Google [Cloud Run](https://cloud.google.com/sdk/gcloud/reference/beta/run/deploy)
+
+    ./deploy.sh
 
 
 # Files Overview
@@ -179,11 +194,3 @@ At the moment pinecone is free up to 1 million vectors, of which we are using ~4
 ## 4. Clean Up Code
 
 Before all the above... The messy code needs to be cleaned up & refactored before getting others to contribute. I'm always open to suggestions in general!
-
-# Deploy to Google [Cloud Run](https://cloud.google.com/sdk/gcloud/reference/beta/run/deploy)
-
-```zsh
-chmod +x *.sh
-./setup.sh
-python3 main.py
-./deploy.sh
