@@ -7,6 +7,9 @@ import logging
 import requests
 import os
 
+from dotenv import load_dotenv
+load_dotenv()
+
 HUGGINGFACE_API_KEY: str = os.getenv('HUGGINGFACE_API_KEY')
 if (HUGGINGFACE_API_KEY == None):
     raise Exception("Missing environment variable HUGGINGFACE_API_KEY")

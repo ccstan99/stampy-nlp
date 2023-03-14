@@ -190,6 +190,10 @@ def extract_api():
     return jsonify(extract_qa(query))
 
 
-if __name__ == '__main__':
+def run():
     logging.basicConfig(level=logging.INFO)
     app.run(debug=True, port=8080)
+
+
+if __name__ == '__main__':
+    run()

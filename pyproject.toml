@@ -18,7 +18,20 @@ dependencies = [
     "gunicorn",
     "pandas",
     "pinecone-client",
+    "python-dotenv",
     "sentence-transformers",
     "torch",
     "transformers",
 ]
+
+[project.urls]
+"Homepage" = "https://github.com/StampyAI/stampy-nlp"
+"Bug Tracker" = "https://github.com/StampyAI/stampy-nlp/issues"
+
+[project.optional-dependencies]
+tests = [
+    "pytest",
+]
+
+[project.scripts]
+run_stampy_nlp = "stampy_nlp.main:run"

@@ -1,11 +1,20 @@
 #!/bin/bash
 set -e
 
-GCLOUD_PROJECT=stampy-nlp
 LOCATION=us-west1
-CLOUD_RUN_SERVICE=stampy-nlp-dev
+CLOUD_RUN_SERVICE=${1:-stampy-nlp} # Allow the service name to be provided as a parameter
 IMAGE=$LOCATION-docker.pkg.dev/$GCLOUD_PROJECT/cloud-run-source-deploy/$CLOUD_RUN_SERVICE
 
+echo "Will execute the following actions:"
+echo "--> Build a docker image"
+echo "--> Push the image as $IMAGE"
+echo "--> Deploy the image as the $CLOUD_RUN_SERVICE service"
+read -r -p "Is that correct? [y/N] " response
+if [[ ! "$response" =~ ^([yY][eE][sS]|[yY])$ ]]; then
+    exit 1
+fi
+
+GCLOUD_PROJECT=stampy-nlp
 echo
 echo "Enabling Google API"
 gcloud config set project $GCLOUD_PROJECT
