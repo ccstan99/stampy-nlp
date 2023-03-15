@@ -33,7 +33,25 @@ def stampy_duplicates():
 
 
 @pytest.fixture
-def mock_retriever_model():
+def mock_pinecone_search():
+    def get_pinecode_results(xq, namespace, top_k=None, filter=None, **kwargs):
+        """There are a load of Pinecone results saved as json results, so just read from the appropriate one."""
+        filename = f'data/pinecone/{xq}+{namespace}+{filter}+{top_k}.json'
+        with open(Path(__file__).parent / filename) as f:
+            data = json.load(f)
+
+        matches = [
+            Mock(id=item['id'], score=item.get('score'), metadata=item.get('metadata', item), __getitem__=getattr)
+            for item in data
+        ]
+        return {'matches': matches}
+
+    with patch('stampy_nlp.search.query_db', get_pinecode_results):
+        yield
+
+
+@pytest.fixture
+def mock_retriever_model(mock_pinecone_search):
     def get_retriever_encodings(query):
         """The models return a massive list of embeddings to be sent directly to Pinecone.
         Seeing as thay're not modified, sending a different string should be fine..."""
@@ -43,20 +61,25 @@ def mock_retriever_model():
 
     model = Mock(encode=get_retriever_encodings)
 
-    def get_pinecode_results(xq, namespace, filter, top_k, *args, **kwargs):
-        """There are a load of Pinecone results saved as json results, so just read from the appropriate one."""
-        with open(Path(__file__).parent / (f'data/pinecone/{xq}+{namespace}+{filter}+{top_k}.json')) as f:
-            data = json.load(f)
-
-        matches = [
-            Mock(id=item['id'], score=item['score'], metadata=item)
-            for item in data
-        ]
-        return {'matches': matches}
-
     with patch('stampy_nlp.search.get_retriever', return_value=model):
-        with patch('stampy_nlp.search.query_db', get_pinecode_results):
-            yield
+        yield
+
+
+@pytest.fixture
+def mock_reader_model(mock_pinecone_search):
+    def get_reader_encodings(question, context):
+        filename = f'data/semantic_search/reader/{question}+{context[:20]}.json'
+        with open(Path(__file__).parent / filename) as f:
+            return json.load(f)
+
+    with patch('stampy_nlp.search.get_reader', return_value=get_reader_encodings):
+        yield
+
+
+@pytest.fixture
+def mock_huggingface_search(mock_pinecone_search):
+    with patch('stampy_nlp.search.hf_search', lambda query: query):
+        yield
 
 
 # Add a command to run live tests - this will by default skip tests marked as live

@@ -86,7 +86,7 @@ def literature_api():
     return jsonify(lit_search(query, top_k=top_k))
 
 
-@api.route('/extract', methods=['GET'])
+@api.route('/extract', methods=['GET', 'POST'])
 def extract_api():
     logger.debug('extract_api()')
     if request.method == "POST":
