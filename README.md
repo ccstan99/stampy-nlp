@@ -151,8 +151,10 @@ and you're not on a Linux x64 system
 
 ## Deploy to Google [Cloud Run](https://cloud.google.com/sdk/gcloud/reference/beta/run/deploy)
 
-    ./deploy.sh
+    ./deploy.sh <service name>
 
+If no service name is provided, the script will deploy to `stampy-nlp`. Before actually doing anything, the script will
+ask to make sure everything is correct.
 
 # Files Overview
 

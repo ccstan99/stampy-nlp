@@ -52,7 +52,7 @@ fi
 
 echo
 echo "Installing Required Libraries..."
-pip install -e .
+pip install -e '.[tests]'
 
 echo
 echo "Run 'source venv/bin/activate' to use the virtualenv"

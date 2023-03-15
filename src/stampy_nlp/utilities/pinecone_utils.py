@@ -28,10 +28,18 @@ def init_db():
     return index
 
 
+INDEX = None
+def get_index():
+    global INDEX
+    if INDEX is None:
+        INDEX = init_db()
+    return INDEX
+
+
 def upload_data(ids, vectors, meta, namespace: str = PINECONE_NAMESPACE, delete_all: bool = False):
     """Upload embeddings to pinecone vector database for faster query"""
     logging.debug(f"upload_data()")
-    index = init_db()
+    index = get_index()
     if delete_all:
         index.delete(delete_all=True, namespace=PINECONE_NAMESPACE)
 
@@ -46,3 +54,7 @@ def upload_data(ids, vectors, meta, namespace: str = PINECONE_NAMESPACE, delete_
                  vectors[i:i+batch_size], meta[i:i+batch_size])),
             namespace=namespace
         )
+
+
+def query(*args, **kwargs):
+    return get_index().query(*args, **kwargs)
