@@ -17,7 +17,6 @@ def init_db():
     """Initialize pinecone vector database to find nearest embeddings"""
     logging.debug("init_db")
     PINECONE_API_KEY = os.getenv('PINECONE_API_KEY')
-    print('pinecone api key', PINECONE_API_KEY)
     if (PINECONE_API_KEY == None):
         raise Exception("Missing environment variable PINECONE_API_KEY")
 

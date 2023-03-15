@@ -6,6 +6,10 @@ GCLOUD_PROJECT=stampy-nlp
 CLOUD_RUN_SERVICE=${1:-stampy-nlp} # Allow the service name to be provided as a parameter
 IMAGE=$LOCATION-docker.pkg.dev/$GCLOUD_PROJECT/cloud-run-source-deploy/$CLOUD_RUN_SERVICE
 
+echo "Running tests:"
+pytest --runlive
+
+echo
 echo "Will execute the following actions:"
 echo "--> Build a docker image"
 echo "--> Push the image as $IMAGE"

@@ -57,3 +57,24 @@ def mock_retriever_model():
     with patch('stampy_nlp.search.get_retriever', return_value=model):
         with patch('stampy_nlp.search.query_db', get_pinecode_results):
             yield
+
+
+# Add a command to run live tests - this will by default skip tests marked as live
+def pytest_addoption(parser):
+    parser.addoption(
+        "--runlive", action="store_true", default=False, help="run live tests"
+    )
+
+
+def pytest_configure(config):
+    config.addinivalue_line("markers", "live: mark test as running on production")
+
+
+def pytest_collection_modifyitems(config, items):
+    if config.getoption("--runlive"):
+        # --runlive given in cli: do not skip live tests
+        return
+    skip_live = pytest.mark.skip(reason="need --runlive option to run")
+    for item in items:
+        if "live" in item.keywords:
+            item.add_marker(skip_live)

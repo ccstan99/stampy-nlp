@@ -1,3 +1,4 @@
+import requests
 import pytest
 from data.duplicates import STAMPY_DUPLICATES
 
@@ -106,3 +107,49 @@ def test_search_status_overrides_showLive(client, mock_retriever_model):
     response = client.get(f'/api/search?top=10&showLive=true&status=In review')
     assert response.status_code == 200
     assert {i['status'] for i in response.json} == {'In review'}
+
+
+SEARCH_ENDPOINT = 'https://nlp.stampy.ai/api/search'
+
+@pytest.mark.live
+def test_search_known_question():
+    response = requests.get(SEARCH_ENDPOINT, params={'query': 'What is AI safety?', 'showLive': 1})
+    questions = response.json()
+    assert questions
+    assert 'What is AI safety?' in [i['title'] for i in questions]
+    assert {i['status'] for i in questions} == {'Live on site'}
+
+
+@pytest.mark.live
+def test_search_known_question_live():
+    response = requests.get(SEARCH_ENDPOINT, params={'query': 'What is AI safety?', 'showLive': 0})
+    questions = response.json()
+    assert questions
+    assert 'Live on site' not in {i['status'] for i in questions}
+
+
+@pytest.mark.live
+def test_search_all():
+    response = requests.get(SEARCH_ENDPOINT, params={'query': 'Something random', 'top': 20, 'status': 'all'})
+    questions = response.json()
+    assert len(questions) == 20
+
+    statuses = {i['status'] for i in questions}
+    # This is a potential cause of Heisenbugs, seeing as it's possible that the top 20
+    # questions returned are all live. But this isn't all that likely, so should be fine...?
+    assert len(statuses) > 1
+    assert 'Live on site' in statuses
+
+
+@pytest.mark.live
+def test_search_specific_status():
+    response = requests.get(
+        SEARCH_ENDPOINT,
+        params={'query': 'Something random', 'top': 20, 'status': ['Not started', 'In progress']}
+    )
+    questions = response.json()
+    assert len(questions) == 20
+
+    # This is a potential cause of Heisenbugs, seeing as it's possible that the top 20
+    # questions returned are all live. But this isn't all that likely, so should be fine...?
+    assert {i['status'] for i in questions} == {'Not started', 'In progress'}
