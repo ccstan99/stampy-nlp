@@ -85,19 +85,27 @@ def mock_huggingface_search(mock_pinecone_search):
 # Add a command to run live tests - this will by default skip tests marked as live
 def pytest_addoption(parser):
     parser.addoption(
+        "--rununstable", action="store_true", default=False, help="run tests for parts of the code that are unstable"
+    )
+    parser.addoption(
         "--runlive", action="store_true", default=False, help="run live tests"
     )
 
 
 def pytest_configure(config):
+    config.addinivalue_line("markers", "unstable: mark test for code that is liable to change often")
     config.addinivalue_line("markers", "live: mark test as running on production")
 
 
 def pytest_collection_modifyitems(config, items):
-    if config.getoption("--runlive"):
-        # --runlive given in cli: do not skip live tests
-        return
+    should_run_live = config.getoption("--runlive")
     skip_live = pytest.mark.skip(reason="need --runlive option to run")
+
+    should_run_unstable = config.getoption("--rununstable")
+    skip_unstable = pytest.mark.skip(reason="need --rununstable option to run")
+
     for item in items:
-        if "live" in item.keywords:
+        if "live" in item.keywords and not should_run_live:
             item.add_marker(skip_live)
+        elif "unstable" in item.keywords and not should_run_unstable:
+            item.add_marker(skip_unstable)

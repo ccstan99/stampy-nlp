@@ -2,6 +2,9 @@ import requests
 import pytest
 
 
+pytestmark = pytest.mark.unstable
+
+
 def test_extract_api_defaults(client, mock_retriever_model, mock_reader_model):
     response = client.get('/api/extract')
     assert response.status_code == 200

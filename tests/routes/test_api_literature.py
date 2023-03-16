@@ -2,6 +2,9 @@ import requests
 import pytest
 
 
+pytestmark = pytest.mark.unstable
+
+
 def test_literature_api_defaults(client, mock_huggingface_search):
     response = client.get('/api/literature')
     assert response.status_code == 200
