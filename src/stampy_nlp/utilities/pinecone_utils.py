@@ -4,7 +4,8 @@ Write to Pinecone vector database for finding nearest embedding.
 """
 import pinecone
 import logging
-import os
+from stampy_nlp.settings import get_pinecode_key
+
 
 DEFAULT_TOPK: int = 5
 DIMS: int = 768
@@ -16,11 +17,8 @@ PINECONE_NAMESPACE: str = 'faq-titles'
 def init_db():
     """Initialize pinecone vector database to find nearest embeddings"""
     logging.debug("init_db")
-    PINECONE_API_KEY = os.getenv('PINECONE_API_KEY')
-    if (PINECONE_API_KEY == None):
-        raise Exception("Missing environment variable PINECONE_API_KEY")
 
-    pinecone.init(api_key=PINECONE_API_KEY, environment=GCP_ENV)
+    pinecone.init(api_key=get_pinecode_key(), environment=GCP_ENV)
     if PINECONE_INDEX not in pinecone.list_indexes():
         pinecone.create_index(name=PINECONE_INDEX, dimension=DIMS)
     index = pinecone.Index(PINECONE_INDEX)

@@ -4,8 +4,9 @@ import os
 import json
 
 CODA_TOKEN: str = os.getenv('CODA_TOKEN')
-if (CODA_TOKEN == None):
+if CODA_TOKEN is None:
     raise Exception("Missing environment variable CODA_TOKEN")
+AUTH_PASSWORD = os.getenv('AUTH_PASSWORD', 'miko')
 
 NLP_API_HDR: object = {'Authorization': f'Bearer { "CODA_TOKEN" }'}
 NLP_API_JSON: object = { }
@@ -21,7 +22,8 @@ def encode_faq_titles():
     logging.debug("encode_faq_titles()")
     print("NLP_API_URL", NLP_API_URL)
     duplicates = requests.post(
-        NLP_API_URL, headers=NLP_API_HDR, json=NLP_API_JSON).json()
+        NLP_API_URL, headers=NLP_API_HDR, json=NLP_API_JSON, auth=('stampy', AUTH_PASSWORD)
+    ).json()
     with open(FILENAME, 'w') as f:
         json.dump(duplicates[:MAX], f)
 

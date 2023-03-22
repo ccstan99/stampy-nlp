@@ -1,6 +1,8 @@
 import logging
 import requests
+from functools import wraps
 from flask import render_template, jsonify, request, Blueprint
+from stampy_nlp.settings import AUTH_PASSWORD
 from stampy_nlp.utilities.pinecone_utils import DEFAULT_TOPK
 from stampy_nlp.faq_titles import encode_faq_titles
 from stampy_nlp.search import semantic_search, extract_qa, lit_search
@@ -25,6 +27,24 @@ def as_int(name, default=None):
         return int(request.args.get(name))
     except (TypeError, ValueError):
         return default
+
+
+def check_auth(username, password):
+    return username == 'stampy' and password == AUTH_PASSWORD
+
+
+def auth_required(f):
+    @wraps(f)
+    def wrapped_view(**kwargs):
+        auth = request.authorization
+        if not (auth and check_auth(auth.username, auth.password)):
+            return ('Unauthorized', 401, {
+                'WWW-Authenticate': 'Basic realm="Login Required"'
+            })
+
+        return f(**kwargs)
+
+    return wrapped_view
 
 
 frontend = Blueprint('frontend', __name__, template_folder='templates')
@@ -59,6 +79,7 @@ def extract_html():
 api = Blueprint('api', __name__)
 
 @api.route('/encode-faq-titles', methods=['POST'])
+@auth_required
 def encode_faq_api():
     logger.debug('encode_faq_api()')
     return encode_faq_titles()

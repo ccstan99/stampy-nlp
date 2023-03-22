@@ -35,20 +35,20 @@ def test_find_duplicates():
 
     data = [(title, f'http://bla.bla?title={title}') for title in titles]
     data = pd.DataFrame(data, columns=['title', 'url'])
-    with patch('stampy_nlp.faq_titles.save_duplicates'):
+    with patch('stampy_nlp.faq_titles.upload_duplicates'):
         dups = find_duplicates(model, data)
         confident_duplicate_pairs = [
-            (i['entry1']['title'], i['entry2']['title'])
+            sorted((i['entry1']['title'], i['entry2']['title']))
             for i in dups if i['score'] > 0.5
         ]
         assert confident_duplicate_pairs == [
-            ('A story about dr Who', 'This tells the tale of dr Who'),
-            ('This tells the tale of dr Who', 'The adventures of dr Who'),
-            ('A story about dr Who', 'The adventures of dr Who'),
+            ['A story about dr Who', 'This tells the tale of dr Who'],
+            ['The adventures of dr Who', 'This tells the tale of dr Who'],
+            ['A story about dr Who', 'The adventures of dr Who'],
 
-            ('This one is about cats', 'Cats is the topic of this one'),
+            ['Cats is the topic of this one', 'This one is about cats'],
 
-            ('What are cows?', 'An inquiry into the nature of bovines')
+            ['An inquiry into the nature of bovines', 'What are cows?']
         ]
 
 
@@ -61,7 +61,7 @@ def test_find_duplicates_limit():
 
     data = [(title, f'http://bla.bla?title={title}') for title in titles]
     data = pd.DataFrame(data, columns=['title', 'url'])
-    with patch('stampy_nlp.faq_titles.save_duplicates'):
+    with patch('stampy_nlp.faq_titles.upload_duplicates'):
         with patch('stampy_nlp.faq_titles.MAX_DUPLICATES', 5):
             dups = find_duplicates(model, data)
 

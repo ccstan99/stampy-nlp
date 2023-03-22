@@ -6,10 +6,8 @@ from sentence_transformers import SentenceTransformer
 import logging
 import requests
 import os
-from dotenv import load_dotenv
 
-
-load_dotenv()
+from stampy_nlp.settings import get_huggingface_key
 
 
 HUGGINGFACE_API = 'https://api-inference.huggingface.co/pipeline/feature-extraction/sentence-transformers/'
@@ -20,15 +18,8 @@ LITSEARCH_MODEL_ID = 'allenai-specter'
 READER_MODEL_ID = 'deepset/electra-base-squad2'
 
 
-def api_key():
-    key: str = os.getenv('HUGGINGFACE_API_KEY')
-    if not key:
-        raise Exception("Missing environment variable HUGGINGFACE_API_KEY")
-    return key
-
-
 def api_headers():
-    return {'Authorization': f'Bearer {api_key()}'}
+    return {'Authorization': f'Bearer {get_hugginface_key()}'}
 
 
 RETRIEVER_MODEL = None

@@ -4,8 +4,9 @@ Pull AI Safety FAQs from Coda
 """
 import pandas as pd
 import logging
-import os
 import requests
+
+from stampy_nlp.settings import get_coda_token
 
 
 CODA_DOC_ID: str = 'fau7sl2hmG'
@@ -16,12 +17,9 @@ LIVE_STATUS: str = 'Live on site'
 def get_df_data():
     """Fetches questions from Coda and returns a pandas dataframe for processing"""
     logging.debug(f"get_df_data()")
-    CODA_TOKEN: str = os.getenv('CODA_TOKEN')
-    if (CODA_TOKEN == None):
-        raise Exception("Missing environment variable CODA_TOKEN")
 
     url: str = f'https://coda.io/apis/v1/docs/{CODA_DOC_ID}/tables/{TABLE_ID}/rows'
-    headers: object = {'Authorization': f'Bearer {CODA_TOKEN}'}
+    headers: object = {'Authorization': f'Bearer {get_coda_token()}'}
     params: object = {
         'useColumnNames': True,
         'limit': 1000
