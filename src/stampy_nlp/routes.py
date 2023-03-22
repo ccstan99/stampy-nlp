@@ -16,8 +16,18 @@ def show_duplicates():
     return requests.get(DUPLICATES_URL).json()
 
 
-frontend = Blueprint('frontend', __name__, template_folder='templates')
+def as_bool(name, default='false'):
+    return request.args.get(name, default).lower() in ['1', 'true']
 
+
+def as_int(name, default=None):
+    try:
+        return int(request.args.get(name))
+    except (TypeError, ValueError):
+        return default
+
+
+frontend = Blueprint('frontend', __name__, template_folder='templates')
 
 @frontend.route('/')
 def search_html():
@@ -58,14 +68,11 @@ def encode_faq_api():
 def search_api():
     logger.debug('search_api()')
     query = request.args.get('query', DEFAULT_QUERY)
-    top_k = request.args.get('top', DEFAULT_TOPK)
+    top_k = as_int('top', DEFAULT_TOPK)
     status = request.args.getlist('status')
-    showLive = request.args.get('showLive', 'true').lower() in ['1', 'true']
-    try:
-        top_k = int(top_k)
-    except ValueError:
-        top_k = DEFAULT_TOPK
-    return jsonify(semantic_search(query, top_k=top_k, showLive=showLive, status=status))
+    show_live = as_bool('showLive', 'true')
+
+    return jsonify(semantic_search(query, top_k=top_k, showLive=show_live, status=status))
 
 
 @api.route('/duplicates', methods=['GET'])
@@ -78,11 +85,7 @@ def duplicates_api():
 def literature_api():
     logger.debug('literature_api()')
     query = request.args.get("query", DEFAULT_QUERY)
-    top_k = request.args.get("top", DEFAULT_TOPK)
-    try:
-        top_k = int(top_k)
-    except ValueError:
-        top_k = DEFAULT_TOPK
+    top_k = as_int("top", DEFAULT_TOPK)
     return jsonify(lit_search(query, top_k=top_k))
 
 
@@ -91,6 +94,6 @@ def extract_api():
     logger.debug('extract_api()')
     if request.method == "POST":
         query = request.form.query
-    if request.method == "GET":
+    elif request.method == "GET":
         query = request.args.get("query", DEFAULT_QUERY)
     return jsonify(extract_qa(query))

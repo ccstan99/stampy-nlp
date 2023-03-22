@@ -1,4 +1,4 @@
-"""Cdoa Utilies 
+"""Cdoa Utilies
 
 Pull AI Safety FAQs from Coda
 """
@@ -26,8 +26,7 @@ def get_df_data():
         'useColumnNames': True,
         'limit': 1000
     }
-    json_items = requests.get(url, headers=headers,
-                              params=params).json()['items']
+    json_items = requests.get(url, headers=headers, params=params).json()['items']
     data_list = []
     for item in json_items:
         values = item['values']

@@ -1,5 +1,5 @@
 from sentence_transformers import SentenceTransformer, util
-import stampy_nlp.utilities.pinecone_utils as dbutils
+from stampy_nlp.utilities.pinecone_utils import upload_data, DEFAULT_TOPK
 import stampy_nlp.utilities.coda_utils as codautils
 import stampy_nlp.utilities.huggingface_utils as hfutils
 import logging
@@ -9,7 +9,6 @@ import sys
 
 COUNT: int = 3
 MAX_DUPLICATES:int = 100
-DEFAULT_TOPK: int = dbutils.DEFAULT_TOPK
 MODEL_ID: str = 'multi-qa-mpnet-base-cos-v1'
 delete_all: bool = False
 
@@ -22,19 +21,25 @@ def extract_details(df_row):
     }
 
 
+def save_duplicates(duplicates):
+    with open('stampy-duplicates.json', 'w') as f:
+        json.dump(duplicates, f)
+
+
 def find_duplicates(model, data):
     """Use SentenceTransformer util.paraphrase to find duplicates"""
     logging.debug(f"find_duplicates()")
     titles = data['title']
     mined = util.paraphrase_mining(model, titles, show_progress_bar=True)
-    duplicates = list(map(lambda x: {
-        'score': x[0],
-        'entry1': extract_details(data.iloc[x[1]]),
-        'entry2': extract_details(data.iloc[x[2]])
-    }, mined))
+    duplicates = [
+        {
+            'score': x[0],
+            'entry1': extract_details(data.iloc[x[1]]),
+            'entry2': extract_details(data.iloc[x[2]])
+        } for x in mined
+    ]
     duplicates = duplicates[:MAX_DUPLICATES]
-    with open('stampy-duplicates.json', 'w') as f:
-        json.dump(duplicates, f)
+    save_duplicates(duplicates)
     return duplicates
 
 
@@ -69,7 +74,7 @@ def encode_faq_titles():
         raise(e)
 
     try:
-        dbutils.upload_data(data.index.tolist(), embeddings, metadata, delete_all=delete_all)
+        upload_data(data.index.tolist(), embeddings, metadata, delete_all=delete_all)
     except Exception as e:
         logging.error("Failed upload_data to pinecone")
         raise(e)
