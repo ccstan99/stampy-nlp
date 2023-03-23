@@ -30,7 +30,7 @@ def as_int(name, default=None):
 
 
 def check_auth(username, password):
-    return username == 'stampy' and password == AUTH_PASSWORD
+    return AUTH_PASSWORD and username == 'stampy' and password == AUTH_PASSWORD
 
 
 def auth_required(f):

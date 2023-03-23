@@ -122,6 +122,12 @@ The Stampy Coda table is `https://coda.io/d/_dfau7sl2hmG`
 
 When creating a Pinecone project, make sure that the environment is set to us-west1-gcp
 
+### Duplicates generation
+
+There is an `/api/encode-faq-titles` endpoint that will generate a duplicates file and save it to Cloud
+Storage. To avoid misusage, the endpoint is password protected. The password is provided via the `AUTH_PASSWORD`
+env variable. This is only used for that endpoint - if not set, the endpoint will simply return 401s.
+
 # Deployment
 
 ## Install Google [Cloud SDK](https://cloud.google.com/sdk/docs/install)

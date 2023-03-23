@@ -13,7 +13,7 @@ export CLOUD_RUN_SERVICE=stampy-nlp
 export LOCATION=us-west1
 
 echo "Setup Environment"
-pip install .
+pip install requests
 
 echo "Generate FAQ Encodings for Pinecone"
 python3 encode-faq-titles.py
