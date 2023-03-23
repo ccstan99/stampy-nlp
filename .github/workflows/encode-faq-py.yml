@@ -4,12 +4,11 @@ on:
   schedule:
     - cron: "* 0 * * *"
 env:
-  FILEPATH: ./encode-faq-py/
   FILENAME: stampy-duplicates.json
   PROJECT_ID: stampy-nlp
   BUCKET_ID: stampy-nlp-resources
   CODA_TOKEN: ${{ secrets.CODA_TOKEN }}
-  AUTH_PASSWORD: miko
+  AUTH_PASSWORD: ${{ secrets.AUTH_PASSWORD }}
 jobs:
   encode-faq-py:
     runs-on: ubuntu-latest
@@ -24,26 +23,6 @@ jobs:
         persist-credentials: false # otherwise, the token used is the GITHUB_TOKEN, instead of your personal access token.
         fetch-depth: 0 # otherwise, there would be errors pushing refs to the destination repository.
 
-    - name: 'Authenticate to Google Cloud'
-      id: 'auth'
-      uses: 'google-github-actions/auth@v1'
-      with:
-        credentials_json: '${{ secrets.GCP_CREDENTIALS }}'
-
-    - name: 'Setup Cloud SDK'
-      uses: 'google-github-actions/setup-gcloud@v1'
-      with:
-        version: '>= 400.0.0'
-
-    - name: 'Debugging Info with Cloud CLI'
-      run: |
-        gcloud info
-        gcloud auth list
-        gcloud config list
-
     - name: Generate FAQ Encodings and Upload to Pinecone Vector DB
       id: generate
-      run: |
-        cd ${{ env.FILEPATH }}
-        pip install .
-        python3 encode-faq-titles.py
+      run: /bin/bash encode-faq-titles.sh

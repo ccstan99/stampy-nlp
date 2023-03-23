@@ -1,7 +1,0 @@
-Flask
-gunicorn
-pandas
-pinecone-client
-sentence-transformers
-torch
-transformers
