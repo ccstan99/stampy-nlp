@@ -14,14 +14,15 @@ DUPLICATES_FILENAME: str = os.getenv('DUPLICATES_FILENAME', 'stampy-duplicates.j
 AUTH_PASSWORD: str = os.getenv('AUTH_PASSWORD')
 
 
-required_vars = {
-    'CODA_TOKEN': CODA_TOKEN,
-    'HUGGINGFACE_API_KEY': HUGGINGFACE_API_KEY,
-    'PINECONE_API_KEY': PINECONE_API_KEY,
-}
-missing_vars = [var_name for var_name, val in required_vars.items() if not val]
-if missing_vars:
-    raise Exception(f"Missing environment variables: {', '.join(missing_vars)}")
+def check_required_vars():
+    required_vars = {
+        'CODA_TOKEN': CODA_TOKEN,
+        'HUGGINGFACE_API_KEY': HUGGINGFACE_API_KEY,
+        'PINECONE_API_KEY': PINECONE_API_KEY,
+    }
+    missing_vars = [var_name for var_name, val in required_vars.items() if not val]
+    if missing_vars:
+        raise Exception(f"Missing environment variables: {', '.join(missing_vars)}")
 
 
 def get_coda_token():
