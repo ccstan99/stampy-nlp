@@ -9,6 +9,7 @@ env:
   PROJECT_ID: stampy-nlp
   BUCKET_ID: stampy-nlp-resources
   CODA_TOKEN: ${{ secrets.CODA_TOKEN }}
+  AUTH_PASSWORD: miko
 jobs:
   encode-faq-py:
     runs-on: ubuntu-latest
@@ -39,17 +40,10 @@ jobs:
         gcloud info
         gcloud auth list
         gcloud config list
-          
+
     - name: Generate FAQ Encodings and Upload to Pinecone Vector DB
       id: generate
       run: |
         cd ${{ env.FILEPATH }}
-        pip install -q -r requirements.txt
+        pip install .
         python3 encode-faq-titles.py
-
-    - name: 'Upload Duplicates JSON to Cloud Bucket'
-      id: 'upload-file'
-      uses: 'google-github-actions/upload-cloud-storage@v1'
-      with:
-        path: '${{ env.FILEPATH }}${{ env.FILENAME }}'
-        destination: '${{ env.BUCKET_ID }}'

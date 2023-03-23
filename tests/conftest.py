@@ -8,7 +8,8 @@ from data.duplicates import STAMPY_DUPLICATES
 
 @pytest.fixture
 def app():
-    app = make_app()
+    with patch('stampy_nlp.main.check_required_vars'):
+        app = make_app()
     app.config.update({
         "TESTING": True,
     })

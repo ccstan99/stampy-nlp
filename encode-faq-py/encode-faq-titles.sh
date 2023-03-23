@@ -13,10 +13,7 @@ export CLOUD_RUN_SERVICE=stampy-nlp
 export LOCATION=us-west1
 
 echo "Setup Environment"
-pip install -q -r requirements.txt
+pip install requests
 
 echo "Generate FAQ Encodings for Pinecone"
 python3 encode-faq-titles.py
-
-echo "Uploading Duplicates JSON to Cloud Bucket"
-gcloud storage cp stampy-duplicates.json gs://stampy-nlp-resources
