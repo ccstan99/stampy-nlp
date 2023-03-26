@@ -7,12 +7,6 @@ from model_server import settings
 logger = logging.getLogger(__name__)
 
 
-ENCODE = 'encode'
-QUESTION_ANSWERING = 'question_answering'
-PARAPHRASE_MINING = 'paraphrase_mining'
-DEFAULT = 'default'
-
-
 def error(text, error_code=400):
     return {'error': text}, error_code
 
@@ -47,31 +41,23 @@ def get_model():
         raise Exception(f'Could not initialize model: model_type={model_type}')
 
 
-def get_default_command(model_type):
-    """The command should be provided in the URL path, but if not, then each model has a natural command."""
-    if model_type == settings.PIPELINE:
-        return QUESTION_ANSWERING
-    elif model_type == settings.ENCODER:
-        return ENCODE
-
-
 def handle_command(model, command, payload):
     logger.info('Handling "%s"', command)
     logger.debug('Payload: %s', payload)
 
     query = payload.get('query')
 
-    if command == ENCODE:
+    if command == settings.ENCODE:
         result = verify_fields_exist(payload, 'query') or model.encode(query).tolist()
 
-    elif command == QUESTION_ANSWERING:
+    elif command == settings.QUESTION_ANSWERING:
         result = verify_fields_exist(payload, 'query', 'context') or model(question=query, context=payload.get('context'))
 
-    elif command == PARAPHRASE_MINING:
+    elif command == settings.PARAPHRASE_MINING:
         result = verify_fields_exist(payload, 'titles') or util.paraphrase_mining(model, payload.get('titles'))
 
-    elif command == DEFAULT:
-        return handle_command(model, get_default_command(settings.MODEL_TYPE), payload)
+    elif command == settings.DEFAULT:
+        return handle_command(model, settings.DEFAULT_ACTION, payload)
 
     else:
         return error('Unknown command provided')

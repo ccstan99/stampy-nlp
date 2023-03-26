@@ -6,9 +6,7 @@ from starlette.routing import Route
 from transformers import pipeline
 
 from model_server import settings
-from model_server.handler import (
-    server_loop, DEFAULT, ENCODE, QUESTION_ANSWERING, PARAPHRASE_MINING
-)
+from model_server.handler import server_loop
 
 
 def handler(command):
@@ -30,10 +28,10 @@ def handler(command):
 
 
 routes = [
-    Route("/", handler(DEFAULT), methods=["POST"]),
-    Route("/encoding", handler(ENCODE), methods=["POST"]),
-    Route("/question_answering", handler(QUESTION_ANSWERING), methods=["POST"]),
-    Route("/paraphrase_mining", handler(PARAPHRASE_MINING), methods=["POST"]),
+    Route("/", handler(settings.DEFAULT), methods=["POST"]),
+    Route("/encoding", handler(settings.ENCODE), methods=["POST"]),
+    Route("/question_answering", handler(settings.QUESTION_ANSWERING), methods=["POST"]),
+    Route("/paraphrase_mining", handler(settings.PARAPHRASE_MINING), methods=["POST"]),
 ]
 
 

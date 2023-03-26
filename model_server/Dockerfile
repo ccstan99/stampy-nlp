@@ -20,10 +20,12 @@ FROM base
 
 ARG MODEL_NAME
 ARG MODEL_TYPE
+ARG DEFAULT_ACTION
 
 # Setup the configuration defaults
 RUN echo "MODEL_NAME=${MODEL_NAME}\n\
-MODEL_TYPE=${MODEL_TYPE}" >> .env
+MODEL_TYPE=${MODEL_TYPE}\n\
+DEFAULT_ACTION=${DEFAULT_ACTION}" >> .env
 
 # Fetch the appropriate model
 RUN mkdir models
