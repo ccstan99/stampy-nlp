@@ -40,7 +40,7 @@ def get_df_data():
             url = values['Link']
 
         # add to data_list if some kinds of question, even if unanswered
-        if isinstance(pageid, str) and len(pageid) >= 4 and status not in EXCLUDE_STATUS:
+        if len(pageid) >= 4 and status not in EXCLUDE_STATUS:
             data_list.append({
                 'id': item['id'],
                 'title': item['name'],
