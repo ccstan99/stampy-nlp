@@ -50,8 +50,7 @@ echo "Deploying to Google Cloud Run"
 
 gcloud beta run deploy $CLOUD_RUN_SERVICE --image $IMAGE:latest \
 --min-instances=0 --memory 4G --cpu=2 --platform managed --no-traffic --tag=test \
---service-account=service@stampy-nlp.iam.gserviceaccount.com \
---update-secrets=PINECONE_API_KEY=PINECONE_API_KEY:latest,HUGGINGFACE_API_KEY=HUGGINGFACE_API_KEY:latest,CODA_TOKEN=CODA_TOKEN:latest,AUTH_PASSWORD=AUTH_PASSWORD:latest
+--service-account=service@stampy-nlp.iam.gserviceaccount.com
 
 echo
 echo "Project ID: $GCLOUD_PROJECT"

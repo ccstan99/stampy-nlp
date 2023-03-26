@@ -6,7 +6,9 @@ from starlette.routing import Route
 from transformers import pipeline
 
 from model_server import settings
-from model_server.handler import server_loop, DEFAULT, ENCODE, QUESTION_ANSWERING
+from model_server.handler import (
+    server_loop, DEFAULT, ENCODE, QUESTION_ANSWERING, PARAPHRASE_MINING
+)
 
 
 def handler(command):
@@ -17,14 +19,10 @@ def handler(command):
         except JSONDecodeError:
             return JSONResponse({'error': 'invalid JSON provided'}, status_code=400)
 
-        query = payload.get('query')
-        if not query:
-            return JSONResponse({'error': 'No query provided'}, status_code=400)
-
         # The model should only be loaded into memory once, seeing it's large.
         # Use a queue to send/receive messages from it.
         response_q = asyncio.Queue()
-        await request.app.model_queue.put((command, query, payload, response_q))
+        await request.app.model_queue.put((command, payload, response_q))
         output, status = await response_q.get()
         return JSONResponse(output, status_code=status)
 
@@ -35,6 +33,7 @@ routes = [
     Route("/", handler(DEFAULT), methods=["POST"]),
     Route("/encoding", handler(ENCODE), methods=["POST"]),
     Route("/question_answering", handler(QUESTION_ANSWERING), methods=["POST"]),
+    Route("/paraphrase_mining", handler(PARAPHRASE_MINING), methods=["POST"]),
 ]
 
 

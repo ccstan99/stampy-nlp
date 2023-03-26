@@ -1,6 +1,6 @@
 import logging
 from transformers import pipeline
-from sentence_transformers import SentenceTransformer
+from sentence_transformers import SentenceTransformer, util
 from model_server import settings
 
 
@@ -9,6 +9,7 @@ logger = logging.getLogger(__name__)
 
 ENCODE = 'encode'
 QUESTION_ANSWERING = 'question_answering'
+PARAPHRASE_MINING = 'paraphrase_mining'
 DEFAULT = 'default'
 
 
@@ -18,6 +19,13 @@ def error(text, error_code=400):
 
 def ok(contents):
     return contents, 200
+
+
+def verify_fields_exist(payload, *fields):
+    missing = [field for field in fields if not payload.get(field)]
+    if missing:
+        return {'error': 'Missing fields in payload', 'missing': missing}, 400
+    return None
 
 
 def get_model():
@@ -47,21 +55,23 @@ def get_default_command(model_type):
         return ENCODE
 
 
-def handle_command(model, command, query, params):
-    logger.info('Handling "%s" for "%s"', command, query)
-    logger.debug('Params: %s', params)
+def handle_command(model, command, payload):
+    logger.info('Handling "%s"', command)
+    logger.debug('Payload: %s', payload)
+
+    query = payload.get('query')
 
     if command == ENCODE:
-        result = model.encode(query).tolist()
+        result = verify_fields_exist(payload, 'query') or model.encode(query).tolist()
 
     elif command == QUESTION_ANSWERING:
-        if not params or not params.get('context'):
-            return error('No context provided')
+        result = verify_fields_exist(payload, 'query', 'context') or model(question=query, context=payload.get('context'))
 
-        result = model(question=query, context=params.get('context'))
+    elif command == PARAPHRASE_MINING:
+        result = verify_fields_exist(payload, 'titles') or util.paraphrase_mining(model, payload.get('titles'))
 
     elif command == DEFAULT:
-        return handle_command(model, get_default_command(settings.MODEL_TYPE), query, params)
+        return handle_command(model, get_default_command(settings.MODEL_TYPE), payload)
 
     else:
         return error('Unknown command provided')
@@ -72,9 +82,9 @@ def handle_command(model, command, query, params):
 async def server_loop(q):
     model = get_model()
     while True:
-        command, query, params, response_q = await q.get()
+        command, payload, response_q = await q.get()
         try:
-            out = handle_command(model, command, query, params)
+            out = handle_command(model, command, payload)
         except Exception as e:
             logger.exception('Error while handling command')
             out = error('Could not process command')
