@@ -5,13 +5,15 @@ Pull AI Safety FAQs from Coda
 import pandas as pd
 import logging
 import requests
+from typing import List
 
 from stampy_nlp.settings import get_coda_token
 
 
 CODA_DOC_ID: str = 'fau7sl2hmG'
-TABLE_ID: str = 'Answers'
+TABLE_ID: str = 'table-YvPEyAXl8a'
 LIVE_STATUS: str = 'Live on site'
+EXCLUDE_STATUS: List[str] = ['Duplicate', 'Marked for deletion']
 
 
 def get_df_data():
@@ -38,7 +40,7 @@ def get_df_data():
             url = values['Link']
 
         # add to data_list if some kinds of question, even if unanswered
-        if isinstance(pageid, str) and len(pageid) >= 4:
+        if len(pageid) >= 4 and status not in EXCLUDE_STATUS:
             data_list.append({
                 'id': item['id'],
                 'title': item['name'],
