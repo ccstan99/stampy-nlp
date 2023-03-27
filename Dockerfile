@@ -7,7 +7,6 @@ ENV PYTHONUNBUFFERED True
 WORKDIR /app
 
 # copy all the files to the container
-COPY models ./models
 COPY pyproject.toml pyproject.toml
 
 # install dependencies - setuptools use git to find non python files, hence the magic invocation

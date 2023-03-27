@@ -1,0 +1,28 @@
+version: '3'
+services:
+  retriever-model:
+    build:
+      context: model_server
+      args:
+        MODEL_NAME: sentence-transformers/multi-qa-mpnet-base-cos-v1
+        MODEL_TYPE: encoder
+    ports:
+      - "8124:8080"
+
+  qa-model:
+    build:
+      context: model_server
+      args:
+        MODEL_NAME: deepset/electra-base-squad2
+        MODEL_TYPE: pipeline
+    ports:
+      - "8125:8080"
+
+  lit-search-model:
+    build:
+      context: model_server
+      args:
+        MODEL_NAME: allenai/specter
+        MODEL_TYPE: encoder
+    ports:
+      - "8126:8080"

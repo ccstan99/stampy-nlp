@@ -6,18 +6,20 @@ load_dotenv()
 
 
 CODA_TOKEN: str = os.getenv('CODA_TOKEN')
-HUGGINGFACE_API_KEY: str = os.getenv('HUGGINGFACE_API_KEY')
 PINECONE_API_KEY: str = os.getenv('PINECONE_API_KEY')
 
 STAMPY_BUCKET: str = os.getenv('STAMPY_BUCKET', 'stampy-nlp-resources')
 DUPLICATES_FILENAME: str = os.getenv('DUPLICATES_FILENAME', 'stampy-duplicates.json')
 AUTH_PASSWORD: str = os.getenv('AUTH_PASSWORD')
 
+QA_MODEL_URL: str = os.getenv('QA_MODEL_URL')
+RETRIEVER_MODEL_URL: str = os.getenv('RETRIEVER_MODEL_URL')
+LIT_SEARCH_MODEL_URL: str = os.getenv('LIT_SEARCH_MODEL_URL')
+
 
 def check_required_vars():
     required_vars = {
         'CODA_TOKEN': CODA_TOKEN,
-        'HUGGINGFACE_API_KEY': HUGGINGFACE_API_KEY,
         'PINECONE_API_KEY': PINECONE_API_KEY,
     }
     missing_vars = [var_name for var_name, val in required_vars.items() if not val]
@@ -27,10 +29,6 @@ def check_required_vars():
 
 def get_coda_token():
     return CODA_TOKEN
-
-
-def get_huggingface_key():
-    return HUGGINGFACE_API_KEY
 
 
 def get_pinecode_key():

@@ -1,18 +1,6 @@
 #!/bin/bash
 set -e
 
-echo "Download Transformer Models..."
-mkdir -p ./models
-if [ ! -d ./models/retriever ]; then
-    echo "multi-qa-mpnet-base-cos-v1 not found - fetching"
-    git clone https://huggingface.co/sentence-transformers/multi-qa-mpnet-base-cos-v1 ./models/retriever
-fi
-if [ ! -d ./models/reader ]; then
-    echo "electra-base-squad2 - fetching"
-    git clone https://huggingface.co/deepset/electra-base-squad2 ./models/reader
-fi
-echo "-> Models downloaded to ./models"
-
 echo
 echo "Setting up Dev Env..."
 if [ -d venv ]; then
@@ -38,14 +26,13 @@ if [ ! -f .env ]; then
     echo "Create a Pinecode token (https://app.pinecone.io), but make sure the environment is 'us-west1-gcp'"
     read -p "Pinecode API key: " PINECONE_TOKEN
 
-    echo
-    echo "Create a Huggingface token at https://huggingface.co/settings/tokens"
-    read -p "Huggingface API key: " HUGGINGFACE_TOKEN
-
     cat << EOT > .env
 CODA_TOKEN=$CODA_TOKEN
 PINECONE_API_KEY=$PINECONE_TOKEN
-HUGGINGFACE_API_KEY=$HUGGINGFACE_TOKEN
+
+QA_MODEL_URL=http://0.0.0.0:8125
+RETRIEVER_MODEL_URL=http://0.0.0.0:8124
+LIT_SEARCH_MODEL_URL=http://0.0.0.0:8126
 EOT
     echo "-> Tokens written to ./.env"
 fi

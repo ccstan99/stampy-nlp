@@ -20,9 +20,6 @@ dependencies = [
     "pandas",
     "pinecone-client",
     "python-dotenv",
-    "sentence-transformers",
-    "torch",
-    "transformers",
 ]
 
 [project.urls]

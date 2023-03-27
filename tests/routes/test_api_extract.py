@@ -5,7 +5,7 @@ import pytest
 pytestmark = pytest.mark.unstable
 
 
-def test_extract_api_defaults(client, mock_retriever_model, mock_reader_model):
+def test_extract_api_defaults(client, mock_retriever_model, mock_qa_model):
     response = client.get('/api/extract')
     assert response.status_code == 200
     assert [i['answer'] for i in response.json] == [
@@ -20,7 +20,7 @@ def test_extract_api_defaults(client, mock_retriever_model, mock_reader_model):
     ]
 
 
-def test_extract_api_score(client, mock_retriever_model, mock_reader_model):
+def test_extract_api_score(client, mock_retriever_model, mock_qa_model):
     response = client.get('/api/extract')
     assert response.status_code == 200
     assert all(i['score'] > 0.001 for i in response.json)
@@ -30,7 +30,7 @@ def test_extract_api_score(client, mock_retriever_model, mock_reader_model):
     ('What is AI Safety?', 'smarter-than-human AI'),
     ('Find me some data', 'extensive data about individual users across a long period of time')
 ))
-def test_extract_api_question(client, mock_retriever_model, mock_reader_model, question, expected_first):
+def test_extract_api_question(client, mock_retriever_model, mock_qa_model, question, expected_first):
     response = client.get(f'/api/extract?query={question}')
     assert response.status_code == 200
     assert response.json[0]['answer'] == expected_first

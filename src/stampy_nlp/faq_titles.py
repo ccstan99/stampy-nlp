@@ -2,11 +2,10 @@ import logging
 import json
 import sys
 from google.cloud import storage
-from sentence_transformers import SentenceTransformer, util
 from stampy_nlp.settings import STAMPY_BUCKET, DUPLICATES_FILENAME
 from stampy_nlp.utilities.pinecone_utils import upload_data, DEFAULT_TOPK
 import stampy_nlp.utilities.coda_utils as codautils
-import stampy_nlp.utilities.huggingface_utils as hfutils
+from stampy_nlp.models import retriever_model
 
 logger = logging.getLogger(__name__)
 
@@ -33,11 +32,11 @@ def upload_duplicates(duplicates):
     blob.upload_from_string(json.dumps(duplicates))
 
 
-def find_duplicates(model, data):
+def find_duplicates(data):
     """Use SentenceTransformer util.paraphrase to find duplicates"""
     logger.debug("find_duplicates()")
-    titles = data['title']
-    mined = util.paraphrase_mining(model, titles, show_progress_bar=True)
+    titles = data['title'].tolist()
+    mined = retriever_model.paraphrase_mining(titles)
     duplicates = [
         {
             'score': x[0],
@@ -60,20 +59,14 @@ def encode_faq_titles():
         raise(e)
 
     try:
-        model = SentenceTransformer(MODEL_ID)
-    except Exception as e:
-        logger.error("Failed to load SentenceTransformer %s.", MODEL_ID)
-        raise(e)
-
-    try:
-        duplicates = find_duplicates(model, data)
+        duplicates = find_duplicates(data)
         logger.debug("find_duplicates %s", duplicates[:COUNT])
     except Exception as e:
         logger.error("Failed find_duplicates")
         raise(e)
 
     try:
-        embeddings = hfutils.embed_text(model, data['title']).tolist()
+        embeddings = retriever_model.encode(data['title'].tolist())
         metadata = json.loads(data.to_json(orient='records'))
         logger.debug("metadata %s", metadata[:COUNT])
     except Exception as e:

@@ -84,22 +84,6 @@ https://nlp.stampy.ai/api/extract?query=What+AI+safety%3F
 ```
 
 # Setup Environment
-## Install [Git Large File Storage](https://git-lfs.com)
-
-After cloning this repo, the large Transformer models must be downloaded separately using `git lfs`.
-
-### Linux
-
-```bash
-curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | sudo bash
-sudo apt-get install git-lfs
-git lfs install
-```
-
-### MacOS
-
-    brew install git-lfs
-
 ## Run the setup script
 
     ./setup.sh
@@ -111,7 +95,7 @@ If this is your first run, it will:
 * install all requirements
 
 Subsequent runs will skip bits that have already been done, but it does so by simply checking whether the appropriate files exist.
-API tokens for [Coda](https://coda.io/account), [Pinecone](https://app.pinecone.io), [Hugging Face](https://huggingface.co/settings/tokens) are required,
+API tokens for [Coda](https://coda.io/account) and [Pinecone](https://app.pinecone.io) are required,
 but the script will ask you for them.
 
 ### Coda
@@ -127,6 +111,21 @@ When creating a Pinecone project, make sure that the environment is set to us-we
 There is an `/api/encode-faq-titles` endpoint that will generate a duplicates file and save it to Cloud
 Storage. To avoid misusage, the endpoint is password protected. The password is provided via the `AUTH_PASSWORD`
 env variable. This is only used for that endpoint - if not set, the endpoint will simply return 401s.
+
+### Remote models
+
+The models used are hosted separately and are provided via the following env variables:
+
+    QA_MODEL_URL=http://0.0.0.0:8125
+    RETRIEVER_MODEL_URL=http://0.0.0.0:8124
+    LIT_SEARCH_MODEL_URL=http://0.0.0.0:8126
+
+To help with local development you can set up the above model servers via docker-compose:
+
+    docker-compose up
+
+This should work, but slowly. If you want faster results, consider either manually running the model that you're
+using (check the `model_server` folder for details), or provide a cloud server with the model.
 
 # Deployment
 
