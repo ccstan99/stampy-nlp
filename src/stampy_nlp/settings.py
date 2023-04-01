@@ -5,6 +5,8 @@ from dotenv import load_dotenv
 load_dotenv()
 
 
+LOG_LEVEL: str = os.getenv('LOG_LEVEL', 'INFO')
+
 CODA_TOKEN: str = os.getenv('CODA_TOKEN')
 PINECONE_API_KEY: str = os.getenv('PINECONE_API_KEY')
 

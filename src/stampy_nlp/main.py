@@ -1,4 +1,3 @@
-import logging
 from flask import Flask
 from stampy_nlp.routes import frontend, api
 from stampy_nlp.settings import check_required_vars
@@ -18,7 +17,6 @@ def make_app():
 
 
 def run():
-    logging.basicConfig(level=logging.INFO)
     app = make_app()
     app.run(debug=True, port=8080)
 

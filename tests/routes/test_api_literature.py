@@ -1,3 +1,4 @@
+from unittest.mock import patch
 import requests
 import pytest
 
@@ -15,6 +16,22 @@ def test_literature_api_defaults(client, mock_lit_search):
         'The Concept of Criticality in AI Safety',
         'System Safety and Artificial Intelligence'
     ]
+
+
+def test_literature_query_logged(client, mock_lit_search):
+    with patch('stampy_nlp.routes.log_query') as logger:
+        response = client.get(f'/api/literature?query=Find me some data')
+        logger.assert_called_once_with('/api/literature', 'GET', 'Find me some data')
+
+    assert response.status_code == 200
+
+
+def test_literature_query_logged_default(client, mock_lit_search):
+    with patch('stampy_nlp.routes.log_query') as logger:
+        response = client.get(f'/api/literature')
+        logger.assert_called_once_with('/api/literature', 'GET', 'What is AI Safety?')
+
+    assert response.status_code == 200
 
 
 @pytest.mark.parametrize('query, first_item', (
