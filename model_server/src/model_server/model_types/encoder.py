@@ -2,7 +2,6 @@ from starlette.routing import Route
 from sentence_transformers import SentenceTransformer, util
 
 from model_server.model_types.base_model import ModelType, handler, verify_fields_exist
-from model_server.consts import ENCODE, PARAPHRASE_MINING
 
 
 class Encoder(ModelType):
@@ -23,12 +22,7 @@ class Encoder(ModelType):
         return self.ok(util.paraphrase_mining(self.model, payload.get('titles')))
 
     async def default(self, request):
-        if self.default_action == ENCODE:
-            return await self.encode(request)
-        elif self.default_action == PARAPHRASE_MINING:
-            return await self.paraphrase_mining(request)
-        else:
-            return self.error('No valid default action provided')
+        return await self.encode(request)
 
     def routes(self):
         return [

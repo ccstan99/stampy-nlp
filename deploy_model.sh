@@ -5,7 +5,6 @@ LOCATION=us-west1
 GCLOUD_PROJECT=stampy-nlp
 MODEL_NAME=$2
 MODEL_TYPE=$3
-DEFAULT_ACTION=$4
 CLOUD_RUN_SERVICE=$1 # Allow the service name to be provided as a parameter
 IMAGE=$LOCATION-docker.pkg.dev/$GCLOUD_PROJECT/cloud-run-source-deploy/$CLOUD_RUN_SERVICE
 
@@ -46,8 +45,7 @@ docker pull --platform linux/amd64 python:3.8
 docker pull --platform linux/amd64 $IMAGE || true
 docker buildx build --platform linux/amd6 -t $IMAGE model_server \
        --build-arg MODEL_NAME=$MODEL_NAME \
-       --build-arg MODEL_TYPE=$MODEL_TYPE \
-       --build-arg DEFAULT_ACTION=$DEFAULT_ACTION
+       --build-arg MODEL_TYPE=$MODEL_TYPE
 docker push $IMAGE:latest
 
 echo "Deploying to Google Cloud Run"

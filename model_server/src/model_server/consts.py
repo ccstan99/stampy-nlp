@@ -1,11 +1,6 @@
 # The possible model types
-PIPELINE = 'pipeline'
-ENCODER = 'encoder'
+QUESTION_ANSWERING = 'question-answering'
+ENCODING = 'encoding'
+PARAPHRASE_MINING = 'paraphrase-mining'
 
-# Available model actions (not all models can handle all of them)
-DEFAULT = 'default'
-ENCODE = 'encode'
-QUESTION_ANSWERING = 'question_answering'
-PARAPHRASE_MINING = 'paraphrase_mining'
-
-ALL_ACTIONS = [ENCODE, QUESTION_ANSWERING, PARAPHRASE_MINING]
+ALL_ACTIONS = [ENCODING, QUESTION_ANSWERING, PARAPHRASE_MINING]
