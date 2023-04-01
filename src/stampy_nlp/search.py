@@ -1,9 +1,9 @@
 import logging
 import urllib
-from stampy_nlp.utilities.pinecone_utils import DEFAULT_TOPK, query as query_db
-from stampy_nlp.utilities.huggingface_utils import get_reader, get_retriever, lit_search as hf_search
+from stampy_nlp.utilities.pinecone_utils import DEFAULT_TOPK
 from stampy_nlp.utilities.coda_utils import LIVE_STATUS
 from stampy_nlp.faq_titles import encode_faq_titles
+from stampy_nlp.models import qa_model, retriever_model, lit_search_model
 
 logger = logging.getLogger(__name__, )
 logger.setLevel(logging.DEBUG)
@@ -30,8 +30,6 @@ def semantic_search(query: str, top_k: int = DEFAULT_TOPK, showLive: bool = True
     """Semantic search for query"""
     logger.info("semantic_search: %s", query)
     logger.debug("params top_k=%s, status=%s, showLive=%s", top_k, status, showLive)
-    xq = get_retriever().encode(query).tolist()
-    logger.debug('model encode: %s', xq[:COUNT])
     filters = {}
     if not status:
         if showLive:
@@ -41,17 +39,14 @@ def semantic_search(query: str, top_k: int = DEFAULT_TOPK, showLive: bool = True
     elif ALL not in status:
         filters = {'status': {'$in': status}}
 
-    results = query_db(xq, namespace=namespace, filter=filters, top_k=top_k, includeMetadata=True)
+    results = retriever_model.search(query, namespace=namespace, filter=filters, top_k=top_k)
     return format_matches(results)
 
 
 def lit_search(query, top_k=DEFAULT_TOPK, namespace='paper-abstracts'):
     """Search index of arxiv paper abstracts and blog post summaries"""
     logger.debug("lit_search (%s, %s)", query, top_k)
-    # lit search expect lower freq, use HF http inference API for now
-    xq = hf_search(query)
-    logger.debug("model encode: %s", xq[:5])
-    results = query_db(xq, namespace=namespace, top_k=top_k, includeMetadata=True)
+    results = lit_search_model.search(query, namespace=namespace, top_k=top_k)
     return format_matches(results)
 
 
@@ -61,7 +56,7 @@ def extract_answer(query, item):
     context = str(metadata['text'])
     logger.debug("context: %s", context)
 
-    response = get_reader()(question=query, context=context)
+    response = qa_model.question_answering(query, context)
     logger.debug("response: %s", response)
     try:
         score = response['score']
@@ -84,9 +79,7 @@ def extract_answer(query, item):
 def extract_qa(query, namespace='extracted-chunks'):
     """Search extracted chunks alignment dataset"""
     logger.debug("extract_qa:{query}")
-    xq = get_retriever().encode(query).tolist()
-    logger.debug("model encode: %s", xq[:5])
-    results = query_db(xq, namespace=namespace, top_k=10, includeMetadata=True)
+    results = retriever_model.search(query, namespace=namespace, top_k=10)
 
     answers = {}
     for item in results['matches']:

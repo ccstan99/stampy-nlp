@@ -52,7 +52,3 @@ def upload_data(ids, vectors, meta, namespace: str = PINECONE_NAMESPACE, delete_
                  vectors[i:i+batch_size], meta[i:i+batch_size])),
             namespace=namespace
         )
-
-
-def query(*args, **kwargs):
-    return get_index().query(*args, **kwargs)

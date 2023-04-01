@@ -3,8 +3,14 @@ set -e
 
 LOCATION=us-west1
 GCLOUD_PROJECT=stampy-nlp
+GCLOUD_PROJECT_ID=t6p37v2uia
 CLOUD_RUN_SERVICE=${1:-stampy-nlp} # Allow the service name to be provided as a parameter
 IMAGE=$LOCATION-docker.pkg.dev/$GCLOUD_PROJECT/cloud-run-source-deploy/$CLOUD_RUN_SERVICE
+
+# Model URLs
+QA_MODEL_URL=https://qa-model-$GCLOUD_PROJECT_ID-uw.a.run.app
+RETRIEVER_MODEL_URL=https://retriever-model-$GCLOUD_PROJECT_ID-uw.a.run.app
+LIT_SEARCH_MODEL_URL=https://lit-search-model-$GCLOUD_PROJECT_ID-uw.a.run.app
 
 echo "Running tests:"
 pytest --runlive
@@ -40,7 +46,8 @@ echo "Deploying to Google Cloud Run"
 gcloud beta run deploy $CLOUD_RUN_SERVICE --image $IMAGE:latest \
 --min-instances=1 --memory 4G --cpu=2 --platform managed --no-traffic --tag=test \
 --service-account=service@stampy-nlp.iam.gserviceaccount.com \
---update-secrets=PINECONE_API_KEY=PINECONE_API_KEY:latest,HUGGINGFACE_API_KEY=HUGGINGFACE_API_KEY:latest,CODA_TOKEN=CODA_TOKEN:latest,AUTH_PASSWORD=AUTH_PASSWORD:latest
+--update-env-vars=QA_MODEL_URL=$QA_MODEL_URL,RETRIEVER_MODEL_URL=$RETRIEVER_MODEL_URL,LIT_SEARCH_MODEL_URL=$LIT_SEARCH_MODEL_URL
+--update-secrets=PINECONE_API_KEY=PINECONE_API_KEY:latest,CODA_TOKEN=CODA_TOKEN:latest,AUTH_PASSWORD=AUTH_PASSWORD:latest
 
 echo
 echo "Project ID: $GCLOUD_PROJECT"

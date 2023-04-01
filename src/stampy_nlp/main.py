@@ -2,6 +2,8 @@ import logging
 from flask import Flask
 from stampy_nlp.routes import frontend, api
 from stampy_nlp.settings import check_required_vars
+from stampy_nlp.models import connect_pinecone
+from stampy_nlp.utilities.pinecone_utils import get_index
 
 
 def make_app():
@@ -11,6 +13,7 @@ def make_app():
     app = Flask(__name__)
     app.register_blueprint(frontend)
     app.register_blueprint(api, url_prefix='/api')
+    connect_pinecone(get_index())
     return app
 
 
