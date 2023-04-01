@@ -33,10 +33,16 @@ def stampy_duplicates():
         yield
 
 
+def clean_name(name, disallowed_chars='<>:"/\|?*'):
+    for c in disallowed_chars:
+        name = name.replace(c, 'X')
+    return name.strip().rstrip('.')
+
+
 def get_pinecode_results(xq, namespace, top_k=None, filter=None, **kwargs):
     """There are a load of Pinecone results saved as json results, so just read from the appropriate one."""
-    filename = f'data/pinecone/{xq}+{namespace}+{filter}+{top_k}.json'
-    with open(Path(__file__).parent / filename) as f:
+    filename = clean_name(f'{xq}+{namespace}+{filter}+{top_k}.json')
+    with open(Path(__file__).parent / 'data' / 'pinecone' / filename) as f:
         data = json.load(f)
 
     matches = [
@@ -59,8 +65,8 @@ def mock_retriever_model():
 @pytest.fixture
 def mock_qa_model():
     def get_reader_encodings(question, context):
-        filename = f'data/semantic_search/reader/{question}+{context[:20]}.json'
-        with open(Path(__file__).parent / filename) as f:
+        filename = clean_name(f'{question}+{context[:20]}.json')
+        with open(Path(__file__).parent / 'data' / 'semantic_search' / 'reader' / filename) as f:
             return json.load(f)
 
     with patch('stampy_nlp.search.qa_model.question_answering', get_reader_encodings):
