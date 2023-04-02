@@ -1,0 +1,32 @@
+[build-system]
+requires = ["setuptools>=45", "setuptools_scm[toml]>=6.2"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "stampy_nlp_model"
+dynamic = ["version"]
+authors = [
+    {name = "ccstan99", email = "hello@stampy.ai"},
+    {name = "Daniel O'Connell", email = "github@ahiru.pl"},
+]
+description = "A simple server to encapsulate LLMs as microservices"
+readme = "README.md"
+requires-python = ">=3.8"
+license = {text = "MIT"}
+dependencies = [
+    "starlette",
+    "asyncio",
+    "uvicorn",
+    "sentence-transformers",
+    "torch",
+    "transformers",
+]
+
+[project.urls]
+"Homepage" = "https://github.com/StampyAI/stampy-nlp"
+"Bug Tracker" = "https://github.com/StampyAI/stampy-nlp/issues"
+
+[project.optional-dependencies]
+tests = [
+    "pytest",
+]
