@@ -3,12 +3,12 @@ import requests
 from functools import wraps
 from flask import render_template, jsonify, request, Blueprint
 from stampy_nlp.settings import AUTH_PASSWORD
+from stampy_nlp.logger import make_logger, log_query
 from stampy_nlp.utilities.pinecone_utils import DEFAULT_TOPK
 from stampy_nlp.faq_titles import encode_faq_titles
 from stampy_nlp.search import semantic_search, lit_search, extract_qa, generate_qa
 
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
+logger = make_logger(__name__)
 
 DEFAULT_QUERY: str = 'What is AI Safety?'
 DUPLICATES_URL: str = 'https://storage.googleapis.com/stampy-nlp-resources/stampy-duplicates.json'
@@ -47,9 +47,25 @@ def auth_required(f):
     return wrapped_view
 
 
+def log_queries(f):
+    @wraps(f)
+    def wrapper(*args, **kwargs):
+        if request.method == 'GET':
+            query = request.args.get('query', DEFAULT_QUERY)
+        elif request.method == 'POST':
+            query = request.form.query
+        else:
+            query = None
+
+        log_query(request.path, request.method, query)
+        return f(*args, **kwargs)
+    return wrapper
+
+
 frontend = Blueprint('frontend', __name__, template_folder='templates')
 
 @frontend.route('/')
+@log_queries
 def search_html():
     logger.debug('search_html()')
     query = DEFAULT_QUERY
@@ -63,6 +79,7 @@ def duplicates_html():
 
 
 @frontend.route('/literature')
+@log_queries
 def literature_html():
     logger.debug('literature_html()')
     query = DEFAULT_QUERY
@@ -70,6 +87,7 @@ def literature_html():
 
 
 @frontend.route('/extract')
+@log_queries
 def extract_html():
     logger.debug('extract_html()')
     query = DEFAULT_QUERY
@@ -86,6 +104,7 @@ def encode_faq_api():
 
 
 @api.route('/search', methods=['GET'])
+@log_queries
 def search_api():
     logger.debug('search_api()')
     query = request.args.get('query', DEFAULT_QUERY)
@@ -103,6 +122,7 @@ def duplicates_api():
 
 
 @api.route('/literature', methods=['GET'])
+@log_queries
 def literature_api():
     logger.debug('literature_api()')
     query = request.args.get("query", DEFAULT_QUERY)
@@ -121,6 +141,7 @@ def chat_api():
 
 
 @api.route('/extract', methods=['GET', 'POST'])
+@log_queries
 def extract_api():
     logger.debug('extract_api()')
     if request.method == "POST":
@@ -128,3 +149,14 @@ def extract_api():
     elif request.method == "GET":
         query = request.args.get("query", DEFAULT_QUERY)
     return jsonify(extract_qa(query))
+
+
+@api.route('/log_query', methods=['GET'])
+def log_query_endpoint():
+    logger.debug('log_query()')
+    log_query(
+        request.args.get("name"),
+        request.args.get("type"),
+        request.args.get("query"),
+    )
+    return jsonify({'result': 'ok'})

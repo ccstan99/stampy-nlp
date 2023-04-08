@@ -1,13 +1,12 @@
-import logging
 import urllib
 from stampy_nlp.utilities.openai_utils import generate_answer
 from stampy_nlp.utilities.pinecone_utils import DEFAULT_TOPK
+from stampy_nlp.logger import make_logger
 from stampy_nlp.utilities.coda_utils import LIVE_STATUS
 from stampy_nlp.faq_titles import encode_faq_titles
 from stampy_nlp.models import qa_model, retriever_model, lit_search_model
 
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
+logger = make_logger(__name__)
 
 COUNT: int = 3
 DEFAULT_QUERY: str = 'What is AI Safety?'

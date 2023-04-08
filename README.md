@@ -177,7 +177,7 @@ Files named `encode_*.py` use the relevant model to encode the associated text t
 
 ## 1. Automate Deployment
 
-Right now all this is deployed on Google Cloud Run, which allows all the dependencies to be containerized, supposedly starts up instantaneously and should scale to meet increased demand. Each of the HuggingFace NLP models are ~400 MB and we use 3 separate ones. Originally, to keep the app size small, I used the external Hugging Face API but it was very slow. To speed up inference, the transformer models are now packaged as part of the Cloud Run container, but that also means the app requires at least 4GB of memory to run as one "monolith." I believe this approach has addressed the latency issue for now. There are some recommendations to split the 3 models' functions into separate microservices which can run and scale independently, which is something I was planning to try next. Thoughts on other options?
+Right now all this is deployed on Google Cloud Run, which allows all the dependencies to be containerized, supposedly starts up instantaneously and should scale to meet increased demand. Each of the HuggingFace NLP models are ~400 MB and we use 3 separate ones. Originally, to keep the app size small, I used the external Hugging Face API but it was very slow. This has been split up, but now there are 4 services to be managed, with more likely to appear. Something like terraform would be good to have.
 
 ## 2. Keep Code Databases Synchronized
 
