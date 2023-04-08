@@ -12,7 +12,6 @@ logger = logging.getLogger(__name__)
 
 COUNT: int = 3
 MAX_DUPLICATES:int = 100
-MODEL_ID: str = 'multi-qa-mpnet-base-cos-v1'
 delete_all: bool = False
 
 

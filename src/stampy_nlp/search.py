@@ -1,17 +1,19 @@
 import logging
 import urllib
+from stampy_nlp.utilities.openai_utils import generate_answer
 from stampy_nlp.utilities.pinecone_utils import DEFAULT_TOPK
 from stampy_nlp.utilities.coda_utils import LIVE_STATUS
 from stampy_nlp.faq_titles import encode_faq_titles
 from stampy_nlp.models import qa_model, retriever_model, lit_search_model
 
-logger = logging.getLogger(__name__, )
+logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
 COUNT: int = 3
 DEFAULT_QUERY: str = 'What is AI Safety?'
 BLANK: str = ''
 ALL: str = 'all'
+NONBLANK_URL = {'url': {'$ne': BLANK}}
 
 
 def format_matches(results):
@@ -29,7 +31,8 @@ def format_matches(results):
 def semantic_search(query: str, top_k: int = DEFAULT_TOPK, showLive: bool = True, status=[], namespace: str = 'faq-titles'):
     """Semantic search for query"""
     logger.info("semantic_search: %s", query)
-    logger.debug("params top_k=%s, status=%s, showLive=%s", top_k, status, showLive)
+    logger.debug("params top_k=%s, status=%s, showLive=%s",
+                 top_k, status, showLive)
     filters = {}
     if not status:
         if showLive:
@@ -39,7 +42,8 @@ def semantic_search(query: str, top_k: int = DEFAULT_TOPK, showLive: bool = True
     elif ALL not in status:
         filters = {'status': {'$in': status}}
 
-    results = retriever_model.search(query, namespace=namespace, filter=filters, top_k=top_k)
+    results = retriever_model.search(
+        query, namespace=namespace, filter=filters, top_k=top_k)
     return format_matches(results)
 
 
@@ -76,7 +80,7 @@ def extract_answer(query, item):
         pass
 
 
-def extract_qa(query, namespace='extracted-chunks'):
+def extract_qa(query, namespace: str = 'extracted-chunks'):
     """Search extracted chunks alignment dataset"""
     logger.debug("extract_qa:{query}")
     results = retriever_model.search(query, namespace=namespace, top_k=10)
@@ -88,3 +92,34 @@ def extract_qa(query, namespace='extracted-chunks'):
             answers[answer['id']] = answer
 
     return sorted(answers.values(), key=lambda x: x['score'], reverse=True)
+
+
+def generate_qa(query, namespace: str = 'extracted-chunks', top_k: int = DEFAULT_TOPK, **kwargs):
+    """Search extracted chunks alignment dataset. ChatGPT generates answer based on sources"""
+    logger.debug("generate_qa()")
+
+    results = retriever_model.search(
+        query, namespace=namespace, top_k=top_k, filter=NONBLANK_URL)
+    sources = {}
+    source_content = ''
+    for item in results["matches"]:
+        if item["score"] > 0.3:
+            source_content += "\n\nLINK: " + item["metadata"]["url"]
+            source_content += "\n\nCONTENT: " + item["metadata"]["text"]
+            logger.debug("item score: %f %s %s",
+                         item["score"], item["metadata"]["title"], item["metadata"]["url"])
+            if len(item["metadata"]["url"]) > 0:
+                sources[item["metadata"]["url"]] = item["metadata"]["title"]
+
+    stampy_sources = []
+    non_stampy_sources = []
+    # order stampy sources first
+    for url, title in sources.items():
+        if 'aisafety.info' in url:
+            stampy_sources.append({'url': url, 'title': title})
+        else:
+            non_stampy_sources.append({'url': url, 'title': title})
+    sources_ordered = stampy_sources + non_stampy_sources
+    generated_text = generate_answer(query, source_content, **kwargs)
+
+    return {"generated_text": generated_text, "sources": sources_ordered}

@@ -36,7 +36,7 @@ def get_index():
 
 def upload_data(ids, vectors, meta, namespace: str = PINECONE_NAMESPACE, delete_all: bool = False):
     """Upload embeddings to pinecone vector database for faster query"""
-    logging.debug(f"upload_data()")
+    logging.debug("upload_data()")
     index = get_index()
     if delete_all:
         index.delete(delete_all=True, namespace=PINECONE_NAMESPACE)

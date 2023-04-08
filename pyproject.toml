@@ -17,6 +17,7 @@ dependencies = [
     "Flask",
     "google-cloud-storage",
     "gunicorn",
+    "openai",
     "pandas",
     "pinecone-client",
     "python-dotenv",

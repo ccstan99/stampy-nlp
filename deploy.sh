@@ -39,11 +39,11 @@ echo "Building image"
 
 docker pull --platform linux/amd64 python:3.8
 docker buildx build --platform linux/amd6 -t $IMAGE .
-docker push $IMAGE:latest
+docker push $IMAGE\:latest
 
 echo "Deploying to Google Cloud Run"
 
-gcloud beta run deploy $CLOUD_RUN_SERVICE --image $IMAGE:latest \
+gcloud beta run deploy $CLOUD_RUN_SERVICE --image $IMAGE\:latest \
 --min-instances=1 --memory 256M --cpu=2 --platform managed --no-traffic --tag=test \
 --service-account=service@stampy-nlp.iam.gserviceaccount.com \
 --update-env-vars=QA_MODEL_URL=$QA_MODEL_URL,RETRIEVER_MODEL_URL=$RETRIEVER_MODEL_URL,LIT_SEARCH_MODEL_URL=$LIT_SEARCH_MODEL_URL \

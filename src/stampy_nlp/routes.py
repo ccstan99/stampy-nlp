@@ -5,9 +5,9 @@ from flask import render_template, jsonify, request, Blueprint
 from stampy_nlp.settings import AUTH_PASSWORD
 from stampy_nlp.utilities.pinecone_utils import DEFAULT_TOPK
 from stampy_nlp.faq_titles import encode_faq_titles
-from stampy_nlp.search import semantic_search, extract_qa, lit_search
+from stampy_nlp.search import semantic_search, lit_search, extract_qa, generate_qa
 
-logger = logging.getLogger(__name__, )
+logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
 DEFAULT_QUERY: str = 'What is AI Safety?'
@@ -98,7 +98,7 @@ def search_api():
 
 @api.route('/duplicates', methods=['GET'])
 def duplicates_api():
-    logger.debug('api_duplicates()')
+    logger.debug('duplicates_api()')
     return jsonify(show_duplicates())
 
 
@@ -108,6 +108,16 @@ def literature_api():
     query = request.args.get("query", DEFAULT_QUERY)
     top_k = as_int("top", DEFAULT_TOPK)
     return jsonify(lit_search(query, top_k=top_k))
+
+
+@api.route('/chat', methods=['GET', 'POST'])
+def chat_api():
+    logger.debug('chat_api()')
+    if request.method == "POST":
+        query = request.form.query
+    elif request.method == "GET":
+        query = request.args.get("query", DEFAULT_QUERY)
+    return jsonify(generate_qa(query))
 
 
 @api.route('/extract', methods=['GET', 'POST'])
