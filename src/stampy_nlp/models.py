@@ -1,13 +1,13 @@
-import logging
 import requests
 
 from stampy_nlp.settings import (
     QA_MODEL_URL, LIT_SEARCH_MODEL_URL, RETRIEVER_MODEL_URL,
 )
+from stampy_nlp.logger import make_logger
 from stampy_nlp.utilities.pinecone_utils import DEFAULT_TOPK, get_index
 
 
-logger = logging.getLogger(__name__)
+logger = make_logger(__name__)
 
 
 class ModelConnectionError(Exception):

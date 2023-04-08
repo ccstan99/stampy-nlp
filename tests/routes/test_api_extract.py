@@ -1,3 +1,4 @@
+from unittest.mock import patch
 import requests
 import pytest
 
@@ -24,6 +25,22 @@ def test_extract_api_score(client, mock_retriever_model, mock_qa_model):
     response = client.get('/api/extract')
     assert response.status_code == 200
     assert all(i['score'] > 0.001 for i in response.json)
+
+
+def test_extract_query_logged(client, mock_retriever_model, mock_qa_model):
+    with patch('stampy_nlp.routes.log_query') as logger:
+        response = client.get(f'/api/extract?query=Find me some data')
+        logger.assert_called_once_with('/api/extract', 'GET', 'Find me some data')
+
+    assert response.status_code == 200
+
+
+def test_extract_query_logged_default(client, mock_retriever_model, mock_qa_model):
+    with patch('stampy_nlp.routes.log_query') as logger:
+        response = client.get(f'/api/extract')
+        logger.assert_called_once_with('/api/extract', 'GET', 'What is AI Safety?')
+
+    assert response.status_code == 200
 
 
 @pytest.mark.parametrize('question, expected_first', (
