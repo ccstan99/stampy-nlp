@@ -95,7 +95,7 @@ If this is your first run, it will:
 * install all requirements
 
 Subsequent runs will skip bits that have already been done, but it does so by simply checking whether the appropriate files exist.
-API tokens for [Coda](https://coda.io/account) and [Pinecone](https://app.pinecone.io) are required,
+API tokens for [Coda](https://coda.io/account), [Pinecone](https://app.pinecone.io) and [OpenAI](https://platform.openai.com/account/api-keys) are required,
 but the script will ask you for them.
 
 ### Coda

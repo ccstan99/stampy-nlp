@@ -97,9 +97,8 @@ def generate_qa(query, namespace: str = 'extracted-chunks', top_k: int = DEFAULT
     """Search extracted chunks alignment dataset. ChatGPT generates answer based on sources"""
     logger.debug("generate_qa()")
 
-    results = retriever_model.search(
-        query, namespace=namespace, top_k=top_k, filter=NONBLANK_URL)
-    sources = {}
+    results = retriever_model.search(query, namespace=namespace, top_k=top_k, filter=NONBLANK_URL)
+    sources = []
     source_content = ''
     for item in results["matches"]:
         if item["score"] > 0.3:
@@ -107,18 +106,10 @@ def generate_qa(query, namespace: str = 'extracted-chunks', top_k: int = DEFAULT
             source_content += "\n\nCONTENT: " + item["metadata"]["text"]
             logger.debug("item score: %f %s %s",
                          item["score"], item["metadata"]["title"], item["metadata"]["url"])
-            if len(item["metadata"]["url"]) > 0:
-                sources[item["metadata"]["url"]] = item["metadata"]["title"]
+            if item["metadata"]["url"]:
+                sources.append({'url': item["metadata"]["url"], 'title': item["metadata"]["title"]})
 
-    stampy_sources = []
-    non_stampy_sources = []
-    # order stampy sources first
-    for url, title in sources.items():
-        if 'aisafety.info' in url:
-            stampy_sources.append({'url': url, 'title': title})
-        else:
-            non_stampy_sources.append({'url': url, 'title': title})
-    sources_ordered = stampy_sources + non_stampy_sources
+    sources = sorted(sources, key=lambda i: 'aisafety.info' not in i['url'])
     generated_text = generate_answer(query, source_content, **kwargs)
 
-    return {"generated_text": generated_text, "sources": sources_ordered}
+    return {"generated_text": generated_text, "sources": sources}
