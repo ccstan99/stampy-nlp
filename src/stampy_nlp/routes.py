@@ -54,7 +54,7 @@ def log_queries(f):
         if request.method == 'GET':
             query = request.args.get('query', DEFAULT_QUERY)
         elif request.method == 'POST':
-            query = request.form.query
+            query = request.form.get('query', DEFAULT_QUERY)
         else:
             query = None
 
