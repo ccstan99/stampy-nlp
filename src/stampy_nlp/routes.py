@@ -132,6 +132,7 @@ def literature_api():
 
 
 @api.route('/chat', methods=['GET', 'POST'])
+@log_queries
 def chat_api():
     logger.debug('chat_api()')
     if request.method == "POST":
@@ -139,11 +140,11 @@ def chat_api():
     elif request.method == "GET":
         data = request.args
 
-    query = data.get("query", DEFAULT_QUERY)
+    query = data.get('query', DEFAULT_QUERY)
     params = {}
-    if namespace := data.get("namespace"):
+    if namespace := data.get('namespace'):
         params['namespace'] = namespace
-    if top_k := as_int("top_k", 0, data):
+    if top_k := as_int('top_k', 0, data):
         params['top_k'] = top_k
     if max_history := as_int('max_history', 0, data):
         params['max_history'] = max_history

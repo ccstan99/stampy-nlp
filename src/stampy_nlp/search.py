@@ -95,7 +95,8 @@ def extract_qa(query, namespace: str = 'extracted-chunks'):
 
 def generate_qa(query, namespace: str = 'extracted-chunks', top_k: int = DEFAULT_TOPK, **kwargs):
     """Search extracted chunks alignment dataset. ChatGPT generates answer based on sources"""
-    logger.debug("generate_qa()")
+    logger.info("generate_qa: %s", query)
+    logger.debug("params top_k=%s, namespace=%s", top_k, namespace)
 
     results = retriever_model.search(query, namespace=namespace, top_k=top_k, filter=NONBLANK_URL)
     sources = []
@@ -111,5 +112,7 @@ def generate_qa(query, namespace: str = 'extracted-chunks', top_k: int = DEFAULT
 
     sources = sorted(sources, key=lambda i: 'aisafety.info' not in i['url'])
     generated_text = generate_answer(query, source_content, **kwargs)
+    logger.debug("return generated_text=%s", generated_text)
+    logger.debug("return source_content=%s", source_content)
 
     return {"generated_text": generated_text, "sources": sources}
