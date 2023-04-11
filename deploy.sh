@@ -34,6 +34,7 @@ gcloud services enable iam.googleapis.com
 gcloud services enable run.googleapis.com
 gcloud services enable cloudbuild.googleapis.com
 gcloud services enable logging.googleapis.com
+gcloud auth configure-docker us-west1-docker.pkg.dev
 
 echo "Building image"
 
