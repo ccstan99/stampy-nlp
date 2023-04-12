@@ -5,9 +5,9 @@ echo
 echo "Setting up Dev Env..."
 if [ -d venv ]; then
     echo '-> Using existing virtualenv'
-elif [ `whereis -bq python3.8` ]; then
+elif [ `whereis -b python3.8` ]; then
     virtualenv -p python3.8 venv
-elif [ `whereis -bq python3.9` ]; then
+elif [ `whereis -b python3.9` ]; then
     virtualenv -p python3.9 venv
 else
     echo 'No Python 3.8 or 3.9 found - aborting'  >> /dev/stderr
@@ -26,13 +26,19 @@ if [ ! -f .env ]; then
     echo "Create a Pinecode token (https://app.pinecone.io), but make sure the environment is 'us-west1-gcp'"
     read -p "Pinecode API key: " PINECONE_TOKEN
 
+    echo
+    echo "Create an OpenAI secret key (https://platform.openai.com/account/api-keys)"
+    read -p "OpenAI API key: " OPENAI_TOKEN
+
     cat << EOT > .env
 CODA_TOKEN=$CODA_TOKEN
 PINECONE_API_KEY=$PINECONE_TOKEN
+OPENAI_API_KEY=$OPENAI_TOKEN
 
-QA_MODEL_URL=http://0.0.0.0:8125
-RETRIEVER_MODEL_URL=http://0.0.0.0:8124
-LIT_SEARCH_MODEL_URL=http://0.0.0.0:8126
+GCLOUD_PROJECT_ID=t6p37v2uia
+QA_MODEL_URL=https://qa-model-$GCLOUD_PROJECT_ID-uw.a.run.app
+RETRIEVER_MODEL_URL=https://retriever-model-$GCLOUD_PROJECT_ID-uw.a.run.app
+LIT_SEARCH_MODEL_URL=https://lit-search-model-$GCLOUD_PROJECT_ID-uw.a.run.app
 EOT
     echo "-> Tokens written to ./.env"
 fi

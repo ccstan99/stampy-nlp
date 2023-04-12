@@ -95,7 +95,7 @@ If this is your first run, it will:
 * install all requirements
 
 Subsequent runs will skip bits that have already been done, but it does so by simply checking whether the appropriate files exist.
-API tokens for [Coda](https://coda.io/account) and [Pinecone](https://app.pinecone.io) are required,
+API tokens for [Coda](https://coda.io/account), [Pinecone](https://app.pinecone.io) and [OpenAI](https://platform.openai.com/account/api-keys) are required,
 but the script will ask you for them.
 
 ### Coda
@@ -148,7 +148,7 @@ gcloud auth login --no-launch-browser
 ## Setup Docker
 
 1. Install [Docker](https://docs.docker.com/get-docker/)
-2. Authenticate Docker to Google Cloud: `gcloud auth configure-docker`
+2. Authenticate Docker to Google Cloud: `gcloud auth configure-docker us-west1-docker.pkg.dev`
 
 One thing worth remembering here is that Google Cloud Run containers assume that they'll get a Linux x64 image. The
 deployment scripts should generate appropriate images, but it might be an issue if your deployments don't want to work

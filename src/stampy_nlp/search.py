@@ -1,4 +1,5 @@
 import urllib
+from stampy_nlp.utilities.openai_utils import generate_answer
 from stampy_nlp.utilities.pinecone_utils import DEFAULT_TOPK
 from stampy_nlp.logger import make_logger
 from stampy_nlp.utilities.coda_utils import LIVE_STATUS
@@ -11,6 +12,7 @@ COUNT: int = 3
 DEFAULT_QUERY: str = 'What is AI Safety?'
 BLANK: str = ''
 ALL: str = 'all'
+NONBLANK_URL = {'url': {'$ne': BLANK}}
 
 
 def format_matches(results):
@@ -28,7 +30,8 @@ def format_matches(results):
 def semantic_search(query: str, top_k: int = DEFAULT_TOPK, showLive: bool = True, status=[], namespace: str = 'faq-titles'):
     """Semantic search for query"""
     logger.info("semantic_search: %s", query)
-    logger.debug("params top_k=%s, status=%s, showLive=%s", top_k, status, showLive)
+    logger.debug("params top_k=%s, status=%s, showLive=%s",
+                 top_k, status, showLive)
     filters = {}
     if not status:
         if showLive:
@@ -38,7 +41,8 @@ def semantic_search(query: str, top_k: int = DEFAULT_TOPK, showLive: bool = True
     elif ALL not in status:
         filters = {'status': {'$in': status}}
 
-    results = retriever_model.search(query, namespace=namespace, filter=filters, top_k=top_k)
+    results = retriever_model.search(
+        query, namespace=namespace, filter=filters, top_k=top_k)
     return format_matches(results)
 
 
@@ -75,7 +79,7 @@ def extract_answer(query, item):
         pass
 
 
-def extract_qa(query, namespace='extracted-chunks'):
+def extract_qa(query, namespace: str = 'extracted-chunks'):
     """Search extracted chunks alignment dataset"""
     logger.debug("extract_qa:{query}")
     results = retriever_model.search(query, namespace=namespace, top_k=10)
@@ -87,3 +91,28 @@ def extract_qa(query, namespace='extracted-chunks'):
             answers[answer['id']] = answer
 
     return sorted(answers.values(), key=lambda x: x['score'], reverse=True)
+
+
+def generate_qa(query, namespace: str = 'extracted-chunks', top_k: int = DEFAULT_TOPK, **kwargs):
+    """Search extracted chunks alignment dataset. ChatGPT generates answer based on sources"""
+    logger.info("generate_qa: %s", query)
+    logger.debug("params top_k=%s, namespace=%s", top_k, namespace)
+
+    results = retriever_model.search(query, namespace=namespace, top_k=top_k, filter=NONBLANK_URL)
+    sources = []
+    source_content = ''
+    for item in results["matches"]:
+        if item["score"] > 0.3:
+            source_content += "\n\nLINK: " + item["metadata"]["url"]
+            source_content += "\n\nCONTENT: " + item["metadata"]["text"]
+            logger.debug("item score: %f %s %s",
+                         item["score"], item["metadata"]["title"], item["metadata"]["url"])
+            if item["metadata"]["url"]:
+                sources.append({'url': item["metadata"]["url"], 'title': item["metadata"]["title"]})
+
+    sources = sorted(sources, key=lambda i: 'aisafety.info' not in i['url'])
+    generated_text = generate_answer(query, source_content, **kwargs)
+    logger.debug("return generated_text=%s", generated_text)
+    logger.debug("return source_content=%s", source_content)
+
+    return {"generated_text": generated_text, "sources": sources}

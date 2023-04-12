@@ -6,11 +6,10 @@ from stampy_nlp.settings import AUTH_PASSWORD
 from stampy_nlp.logger import make_logger, log_query
 from stampy_nlp.utilities.pinecone_utils import DEFAULT_TOPK
 from stampy_nlp.faq_titles import encode_faq_titles
-from stampy_nlp.search import semantic_search, extract_qa, lit_search
+from stampy_nlp.search import semantic_search, lit_search, extract_qa, generate_qa, DEFAULT_QUERY
 
 logger = make_logger(__name__)
 
-DEFAULT_QUERY: str = 'What is AI Safety?'
 DUPLICATES_URL: str = 'https://storage.googleapis.com/stampy-nlp-resources/stampy-duplicates.json'
 
 
@@ -18,13 +17,15 @@ def show_duplicates():
     return requests.get(DUPLICATES_URL).json()
 
 
-def as_bool(name, default='false'):
-    return request.args.get(name, default).lower() in ['1', 'true']
+def as_bool(name, default='false', source=None):
+    source = source or request.args
+    return source.get(name, default).lower() in ['1', 'true']
 
 
-def as_int(name, default=None):
+def as_int(name, default=None, source=None):
+    source = source or request.args
     try:
-        return int(request.args.get(name))
+        return int(source.get(name))
     except (TypeError, ValueError):
         return default
 
@@ -53,7 +54,7 @@ def log_queries(f):
         if request.method == 'GET':
             query = request.args.get('query', DEFAULT_QUERY)
         elif request.method == 'POST':
-            query = request.form.query
+            query = request.form.get('query', DEFAULT_QUERY)
         else:
             query = None
 
@@ -117,7 +118,7 @@ def search_api():
 
 @api.route('/duplicates', methods=['GET'])
 def duplicates_api():
-    logger.debug('api_duplicates()')
+    logger.debug('duplicates_api()')
     return jsonify(show_duplicates())
 
 
@@ -128,6 +129,29 @@ def literature_api():
     query = request.args.get("query", DEFAULT_QUERY)
     top_k = as_int("top", DEFAULT_TOPK)
     return jsonify(lit_search(query, top_k=top_k))
+
+
+@api.route('/chat', methods=['GET', 'POST'])
+@log_queries
+def chat_api():
+    logger.debug('chat_api()')
+    if request.method == "POST":
+        data = request.form
+    elif request.method == "GET":
+        data = request.args
+
+    query = data.get('query', DEFAULT_QUERY)
+    params = {}
+    if namespace := data.get('namespace'):
+        params['namespace'] = namespace
+    if top_k := as_int('top_k', 0, data):
+        params['top_k'] = top_k
+    if max_history := as_int('max_history', 0, data):
+        params['max_history'] = max_history
+    if constrain := as_bool('constrain', 'false', data):
+        params['constrain'] = constrain
+
+    return jsonify(generate_qa(query, **params))
 
 
 @api.route('/extract', methods=['GET', 'POST'])

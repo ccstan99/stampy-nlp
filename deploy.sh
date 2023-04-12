@@ -34,20 +34,21 @@ gcloud services enable iam.googleapis.com
 gcloud services enable run.googleapis.com
 gcloud services enable cloudbuild.googleapis.com
 gcloud services enable logging.googleapis.com
+gcloud auth configure-docker us-west1-docker.pkg.dev
 
 echo "Building image"
 
 docker pull --platform linux/amd64 python:3.8
 docker buildx build --platform linux/amd6 -t $IMAGE .
-docker push $IMAGE:latest
+docker push $IMAGE\:latest
 
 echo "Deploying to Google Cloud Run"
 
-gcloud beta run deploy $CLOUD_RUN_SERVICE --image $IMAGE:latest \
+gcloud beta run deploy $CLOUD_RUN_SERVICE --image $IMAGE\:latest \
 --min-instances=1 --memory 256M --cpu=2 --platform managed --no-traffic --tag=test \
 --service-account=service@stampy-nlp.iam.gserviceaccount.com \
 --update-env-vars=QA_MODEL_URL=$QA_MODEL_URL,RETRIEVER_MODEL_URL=$RETRIEVER_MODEL_URL,LIT_SEARCH_MODEL_URL=$LIT_SEARCH_MODEL_URL \
---update-secrets=PINECONE_API_KEY=PINECONE_API_KEY:latest,CODA_TOKEN=CODA_TOKEN:latest,AUTH_PASSWORD=AUTH_PASSWORD:latest
+--update-secrets=PINECONE_API_KEY=PINECONE_API_KEY:latest,CODA_TOKEN=CODA_TOKEN:latest,AUTH_PASSWORD=AUTH_PASSWORD:latest,OPENAI_API_KEY=OPENAI_API_KEY:latest
 
 echo
 echo "Project ID: $GCLOUD_PROJECT"

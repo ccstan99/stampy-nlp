@@ -18,7 +18,7 @@ EXCLUDE_STATUS: List[str] = ['Duplicate', 'Marked for deletion']
 
 def get_df_data():
     """Fetches questions from Coda and returns a pandas dataframe for processing"""
-    logging.debug(f"get_df_data()")
+    logging.debug("get_df_data()")
 
     url: str = f'https://coda.io/apis/v1/docs/{CODA_DOC_ID}/tables/{TABLE_ID}/rows'
     headers: object = {'Authorization': f'Bearer {get_coda_token()}'}
