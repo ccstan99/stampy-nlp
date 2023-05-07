@@ -19,6 +19,12 @@ QA_MODEL_URL: str = os.getenv('QA_MODEL_URL')
 RETRIEVER_MODEL_URL: str = os.getenv('RETRIEVER_MODEL_URL')
 LIT_SEARCH_MODEL_URL: str = os.getenv('LIT_SEARCH_MODEL_URL')
 
+ALLOWED_ORIGINS = os.getenv('ALLOWED_ORIGINS')
+if ALLOWED_ORIGINS:
+    ALLOWED_ORIGINS = [origin.strip() for origin in ALLOWED_ORIGINS.split(',')]
+else:
+    ALLOWED_ORIGINS = '*'
+
 
 def check_required_vars():
     required_vars = {

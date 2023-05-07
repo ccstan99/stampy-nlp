@@ -1,7 +1,22 @@
 from unittest.mock import patch, Mock
 import requests
 import pytest
+from stampy_nlp.settings import ALLOWED_ORIGINS
 from data.duplicates import STAMPY_DUPLICATES
+
+
+@pytest.mark.parametrize('origin', ALLOWED_ORIGINS)
+def test_cors(client, origin):
+    response = client.get('/api/log_query', headers={'Origin': origin})
+    assert response.headers.get('Access-Control-Allow-Origin') == origin
+
+
+@pytest.mark.skipif(ALLOWED_ORIGINS == '*', reason='CORS is not being used')
+def test_cors_non_whitelisted(client):
+    # Note: This test depends on the value of the `ALLOWED_ORIGINS` env variable. If this test
+    # is failing and you have no idea why, check there
+    response = client.get('/api/log_query', headers={'Origin': 'http://this.probably.wont.ever.be.whitelisted'})
+    assert 'Access-Control-Allow-Origin' not in response.headers
 
 
 def test_duplicates(client, stampy_duplicates):
