@@ -119,6 +119,35 @@ def test_search_status_overrides_showLive(client, mock_retriever_model):
     assert {i['status'] for i in response.json} == {'In review'}
 
 
+def test_search_query_logged(client, mock_retriever_model):
+    with patch('stampy_nlp.routes.log_query') as logger:
+        response = client.get(f'/api/search?query=Find me some data')
+        logger.assert_called_once_with('/api/search', 'GET', 'Find me some data')
+
+    assert response.status_code == 200
+
+
+def test_search_query_logged_default(client, mock_retriever_model):
+    with patch('stampy_nlp.routes.log_query') as logger:
+        response = client.get(f'/api/search')
+        logger.assert_called_once_with('/api/search', 'GET', 'What is AI Safety?')
+
+    assert response.status_code == 200
+
+
+def test_search_query_get_content(client, mock_retriever_model):
+    def get_contents(pageid):
+        return f'Content for {pageid}'
+
+    with patch('stampy_nlp.search.get_contents', get_contents):
+        response = client.get(f'/api/search?getContent=true')
+
+    assert response.status_code == 200
+    assert response.json
+    for item in response.json:
+        assert item['content'] == f'Content for {item["pageid"]}'
+
+
 SEARCH_ENDPOINT = 'https://nlp.stampy.ai/api/search'
 
 @pytest.mark.live
@@ -167,19 +196,3 @@ def test_search_specific_status():
     # This is a potential cause of Heisenbugs, seeing as it's possible that the top 20
     # questions returned are all live. But this isn't all that likely, so should be fine...?
     assert {i['status'] for i in questions} == {'Not started', 'In progress'}
-
-
-def test_search_query_logged(client, mock_retriever_model):
-    with patch('stampy_nlp.routes.log_query') as logger:
-        response = client.get(f'/api/search?query=Find me some data')
-        logger.assert_called_once_with('/api/search', 'GET', 'Find me some data')
-
-    assert response.status_code == 200
-
-
-def test_search_query_logged_default(client, mock_retriever_model):
-    with patch('stampy_nlp.routes.log_query') as logger:
-        response = client.get(f'/api/search')
-        logger.assert_called_once_with('/api/search', 'GET', 'What is AI Safety?')
-
-    assert response.status_code == 200
