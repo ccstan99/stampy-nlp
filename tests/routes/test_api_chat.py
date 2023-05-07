@@ -6,6 +6,13 @@ import pytest
 pytestmark = pytest.mark.unstable
 
 
+def test_chat_api_query_required(client):
+    with patch('stampy_nlp.search.generate_answer', return_value="This is a generated answer"):
+        response = client.get('/api/chat', query_string={'query': ''})
+    assert response.status_code == 400
+    assert response.json == {'error': 'No query provided'}
+
+
 def test_chat_api_defaults(client, mock_retriever_model):
     with patch('stampy_nlp.search.generate_answer', return_value="This is a generated answer"):
         response = client.get('/api/chat')
