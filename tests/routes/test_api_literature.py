@@ -18,6 +18,12 @@ def test_literature_api_defaults(client, mock_lit_search):
     ]
 
 
+def test_literature_api_query_required(client):
+    response = client.get('/api/literature', query_string={'query': ''})
+    assert response.status_code == 400
+    assert response.json == {'error': 'No query provided'}
+
+
 def test_literature_query_logged(client, mock_lit_search):
     with patch('stampy_nlp.routes.log_query') as logger:
         response = client.get(f'/api/literature?query=Find me some data')

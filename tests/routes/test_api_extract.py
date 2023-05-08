@@ -21,6 +21,12 @@ def test_extract_api_defaults(client, mock_retriever_model, mock_qa_model):
     ]
 
 
+def test_extract_api_query_required(client):
+    response = client.get('/api/extract', query_string={'query': ''})
+    assert response.status_code == 400
+    assert response.json == {'error': 'No query provided'}
+
+
 def test_extract_api_score(client, mock_retriever_model, mock_qa_model):
     response = client.get('/api/extract')
     assert response.status_code == 200

@@ -34,6 +34,16 @@ def check_auth(username, password):
     return AUTH_PASSWORD and username == 'stampy' and password == AUTH_PASSWORD
 
 
+def get_query(request):
+    if request.method == 'GET':
+        query = request.args.get('query', DEFAULT_QUERY)
+    elif request.method == 'POST':
+        query = request.form.get('query', DEFAULT_QUERY)
+    else:
+        query = None
+    return query
+
+
 def auth_required(f):
     @wraps(f)
     def wrapped_view(**kwargs):
@@ -51,14 +61,18 @@ def auth_required(f):
 def log_queries(f):
     @wraps(f)
     def wrapper(*args, **kwargs):
-        if request.method == 'GET':
-            query = request.args.get('query', DEFAULT_QUERY)
-        elif request.method == 'POST':
-            query = request.form.get('query', DEFAULT_QUERY)
-        else:
-            query = None
-
+        query = get_query(request)
         log_query(request.path, request.method, query)
+        return f(*args, **kwargs)
+    return wrapper
+
+
+def require_query(f):
+    @wraps(f)
+    def wrapper(*args, **kwargs):
+        query = get_query(request)
+        if not (query and query.strip()):
+            return {'error': 'No query provided'}, 400
         return f(*args, **kwargs)
     return wrapper
 
@@ -105,6 +119,7 @@ def encode_faq_api():
 
 
 @api.route('/search', methods=['GET'])
+@require_query
 @log_queries
 def search_api():
     logger.debug('search_api()')
@@ -124,6 +139,7 @@ def duplicates_api():
 
 
 @api.route('/literature', methods=['GET'])
+@require_query
 @log_queries
 def literature_api():
     logger.debug('literature_api()')
@@ -133,6 +149,7 @@ def literature_api():
 
 
 @api.route('/chat', methods=['GET', 'POST'])
+@require_query
 @log_queries
 def chat_api():
     logger.debug('chat_api()')
@@ -156,6 +173,7 @@ def chat_api():
 
 
 @api.route('/extract', methods=['GET', 'POST'])
+@require_query
 @log_queries
 def extract_api():
     logger.debug('extract_api()')

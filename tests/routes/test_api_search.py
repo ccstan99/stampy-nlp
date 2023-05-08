@@ -42,6 +42,13 @@ def test_search_defaults(client, mock_retriever_model):
     ]
 
 
+@pytest.mark.parametrize('query', ('', '   \n ', '  '))
+def test_search_api_query_required(client, query):
+    response = client.get('/api/search', query_string={'query': query})
+    assert response.status_code == 400
+    assert response.json == {'error': 'No query provided'}
+
+
 def test_search_query(client, mock_retriever_model):
     response = client.get('/api/search?query=Find me some data')
     assert response.status_code == 200
