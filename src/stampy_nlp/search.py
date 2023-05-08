@@ -1,8 +1,9 @@
+import concurrent.futures
 import urllib
 from stampy_nlp.utilities.openai_utils import generate_answer
 from stampy_nlp.utilities.pinecone_utils import DEFAULT_TOPK
 from stampy_nlp.logger import make_logger
-from stampy_nlp.utilities.coda_utils import LIVE_STATUS
+from stampy_nlp.utilities.coda_utils import LIVE_STATUS, get_contents
 from stampy_nlp.faq_titles import encode_faq_titles
 from stampy_nlp.models import qa_model, retriever_model, lit_search_model
 
@@ -27,7 +28,17 @@ def format_matches(results):
     return results_list
 
 
-def semantic_search(query: str, top_k: int = DEFAULT_TOPK, showLive: bool = True, status=[], namespace: str = 'faq-titles'):
+def add_doc_content(results):
+    def update(result):
+        result['content'] = get_contents(result['pageid'])
+        return result
+
+    with concurrent.futures.ThreadPoolExecutor(max_workers=3) as executor:
+        results = executor.map(update, results)
+    return list(results)
+
+
+def semantic_search(query: str, top_k: int = DEFAULT_TOPK, showLive: bool = True, status=[], namespace: str = 'faq-titles', get_content=False):
     """Semantic search for query"""
     logger.info("semantic_search: %s", query)
     logger.debug("params top_k=%s, status=%s, showLive=%s",
@@ -43,7 +54,11 @@ def semantic_search(query: str, top_k: int = DEFAULT_TOPK, showLive: bool = True
 
     results = retriever_model.search(
         query, namespace=namespace, filter=filters, top_k=top_k)
-    return format_matches(results)
+    results = format_matches(results)
+
+    if get_content:
+        results = add_doc_content(results)
+    return results
 
 
 def lit_search(query, top_k=DEFAULT_TOPK, namespace='paper-abstracts'):

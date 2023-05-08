@@ -112,8 +112,9 @@ def search_api():
     top_k = as_int('top', DEFAULT_TOPK)
     status = request.args.getlist('status')
     show_live = as_bool('showLive', 'true')
+    get_content = as_bool('getContent', 'false')
 
-    return jsonify(semantic_search(query, top_k=top_k, showLive=show_live, status=status))
+    return jsonify(semantic_search(query, top_k=top_k, showLive=show_live, status=status, get_content=get_content))
 
 
 @api.route('/duplicates', methods=['GET'])
