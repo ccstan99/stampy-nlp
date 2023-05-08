@@ -11,6 +11,7 @@ IMAGE=$LOCATION-docker.pkg.dev/$GCLOUD_PROJECT/cloud-run-source-deploy/$CLOUD_RU
 QA_MODEL_URL=https://qa-model-$GCLOUD_PROJECT_ID-uw.a.run.app
 RETRIEVER_MODEL_URL=https://retriever-model-$GCLOUD_PROJECT_ID-uw.a.run.app
 LIT_SEARCH_MODEL_URL=https://lit-search-model-$GCLOUD_PROJECT_ID-uw.a.run.app
+export ALLOWED_ORIGINS=https://pauseai.info,https://nlp.stampy.ai,https://$CLOUD_RUN_SERVICE-t6p37v2uia-uw.a.run.app
 
 echo "Running tests:"
 pytest --runlive
@@ -47,7 +48,7 @@ echo "Deploying to Google Cloud Run"
 gcloud beta run deploy $CLOUD_RUN_SERVICE --image $IMAGE\:latest \
 --min-instances=1 --memory 256M --cpu=2 --platform managed --no-traffic --tag=test \
 --service-account=service@stampy-nlp.iam.gserviceaccount.com \
---update-env-vars=QA_MODEL_URL=$QA_MODEL_URL,RETRIEVER_MODEL_URL=$RETRIEVER_MODEL_URL,LIT_SEARCH_MODEL_URL=$LIT_SEARCH_MODEL_URL \
+--update-env-vars "^@^QA_MODEL_URL=$QA_MODEL_URL@RETRIEVER_MODEL_URL=$RETRIEVER_MODEL_URL@LIT_SEARCH_MODEL_URL=$LIT_SEARCH_MODEL_URL@ALLOWED_ORIGINS=$ALLOWED_ORIGINS@"
 --update-secrets=PINECONE_API_KEY=PINECONE_API_KEY:latest,CODA_TOKEN=CODA_TOKEN:latest,AUTH_PASSWORD=AUTH_PASSWORD:latest,OPENAI_API_KEY=OPENAI_API_KEY:latest
 
 echo

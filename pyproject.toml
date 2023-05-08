@@ -15,6 +15,7 @@ requires-python = ">=3.8"
 license = {text = "MIT"}
 dependencies = [
     "Flask",
+    "flask-cors",
     "google-cloud-storage",
     "gunicorn",
     "openai",
