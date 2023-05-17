@@ -21,21 +21,30 @@ UI_ID_COLUMN = 'c-203KwSC2N_'
 RICH_TEXT_COLUMN = 'c-a82d-vxRc9'
 
 
-def get_df_data():
-    """Fetches questions from Coda and returns a pandas dataframe for processing"""
-    logging.debug("get_df_data()")
-
+def fetch_all_rows():
     headers: object = {'Authorization': f'Bearer {get_coda_token()}'}
     params: object = {
         'useColumnNames': True,
         'limit': 1000
     }
-    json_items = requests.get(TABLE_URL, headers=headers, params=params).json()['items']
+    response = requests.get(TABLE_URL, headers=headers, params=params).json()
+    while response:
+        for item in response['items']:
+            yield item
+        next_page = response.get('nextPageLink')
+        response = next_page and requests.get(next_page, headers=headers).json()
+
+
+def get_df_data():
+    """Fetches questions from Coda and returns a pandas dataframe for processing"""
+    logging.debug("get_df_data()")
+
     data_list = []
-    for item in json_items:
+    for item in fetch_all_rows():
         values = item['values']
         pageid = str(values['UI ID']).strip()
         status = values['Status']
+        names = [val for val in values.get('All Phrasings', '').split('\n') if val] or [item['name']]
 
         # link to UI if available else use coda link
         if status == 'Live on site':
@@ -45,13 +54,14 @@ def get_df_data():
 
         # add to data_list if some kinds of question, even if unanswered
         if len(pageid) >= 4 and status not in EXCLUDE_STATUS:
-            data_list.append({
-                'id': item['id'],
-                'title': item['name'],
-                'status': status,
-                'pageid': pageid,
-                'url': url,
-            })
+            for name in names:
+                data_list.append({
+                    'id': item['id'],
+                    'title': name,
+                    'status': status,
+                    'pageid': pageid,
+                    'url': url,
+                })
 
     df = pd.DataFrame(data_list)
     df.set_index('id', inplace=True)

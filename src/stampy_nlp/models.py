@@ -37,12 +37,26 @@ class Model:
     def search(self, query, namespace, top_k=DEFAULT_TOPK, includeMetadata=True, **kwargs):
         xq = self.encode(query)
         logger.debug('%s - model encode: %s', self.model_name, xq[:3])
+
+        # Questions can have alternative phrasings, which can result in duplicates being returned.
+        # Pinecone doesn't seem to have a nice way of aggregating answers, so this is done here manually.
+        # This will involve removing duplicates, so to keep the number of returned items around `top_k`,
+        # more items will be fetched. It's assumed that there won't be more than ~50% of duplicates
         results = self.pinecone.query(
             xq, namespace=namespace,
-            top_k=top_k, includeMetadata=includeMetadata,
+            top_k=int(top_k*1.5), includeMetadata=includeMetadata,
             **kwargs
         )
+
         logger.debug('%s - fetched results from pinecone', self.model_name)
+
+        # Replace the matches with the first `top_k` results, removing duplicates
+        items = {}
+        for result in results['matches']:
+            if result['id'] not in items:
+                items[result['id']] = result
+        results['matches'] = list(items.values())[:top_k]
+
         return results
 
     def paraphrase_mining(self, titles):
