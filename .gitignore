@@ -8,7 +8,6 @@ __pycache__
 node_modules
 .DS_Store
 .git
-secrets.sh
 venv
 .env
 *.egg-info/

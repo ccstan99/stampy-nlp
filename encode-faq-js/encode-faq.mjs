@@ -53,7 +53,6 @@ fetch(url, { headers: { Authorization: `Bearer ${CODA_TOKEN}` } })
     .then((enc) => enc.arraySync())
     .then((encodings) => {
 
-      console.log("encodings", encodings)
       console.log(`Questions encoded.`);
       let data = JSON.stringify({ numQs, questions, pageids, encodings});
       fs.writeFile(filename, data, (err) => {
