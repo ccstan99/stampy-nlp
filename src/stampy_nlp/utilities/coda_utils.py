@@ -54,9 +54,11 @@ def get_df_data():
 
         # add to data_list if some kinds of question, even if unanswered
         if len(pageid) >= 4 and status not in EXCLUDE_STATUS:
-            for name in names:
+            for i, name in enumerate(names):
                 data_list.append({
-                    'id': item['id'],
+                    # ids must be unique, and the first name is the original name, which means that
+                    # any subsequent names are duplicates
+                    'id': f'{item["id"]}{i or ""}',
                     'title': name,
                     'status': status,
                     'pageid': pageid,

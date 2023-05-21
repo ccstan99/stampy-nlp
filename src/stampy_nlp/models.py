@@ -53,8 +53,8 @@ class Model:
         # Replace the matches with the first `top_k` results, removing duplicates
         items = {}
         for result in results['matches']:
-            if result['id'] not in items:
-                items[result['id']] = result
+            if result['pageid'] not in items:
+                items[result['pageid']] = result
         results['matches'] = list(items.values())[:top_k]
 
         return results
