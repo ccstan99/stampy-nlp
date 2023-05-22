@@ -38,11 +38,17 @@ fetch(url, { headers: { Authorization: `Bearer ${CODA_TOKEN}` } })
 
   const response = r.items;
   console.log(`${response.length} questions fetched from ${url}.`);
-  
-  const questions = response.map(({ name }) => name);
-  const questionsNormalized = questions.map((question) => question.toLowerCase());
-  const pageids = response.map(({ values }) => values["UI ID"]);
-  
+
+    const [questions, questionsNormalized, pageids] = [[], [], []];
+    response.forEach((item) => {
+        const names = item.values['All Phrasings'].split('\n').filter(Boolean);
+        names.forEach((name) => {
+            questions.push(name);
+            questionsNormalized.push(name.toLowerCase());
+            pageids.push(item.values["UI ID"]);
+        });
+    });
+
   const numQs = questions.length;
 
   use.load()
@@ -53,7 +59,6 @@ fetch(url, { headers: { Authorization: `Bearer ${CODA_TOKEN}` } })
     .then((enc) => enc.arraySync())
     .then((encodings) => {
 
-      console.log("encodings", encodings)
       console.log(`Questions encoded.`);
       let data = JSON.stringify({ numQs, questions, pageids, encodings});
       fs.writeFile(filename, data, (err) => {
