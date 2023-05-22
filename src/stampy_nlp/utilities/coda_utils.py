@@ -55,6 +55,8 @@ def get_df_data():
         # add to data_list if some kinds of question, even if unanswered
         if len(pageid) >= 4 and status not in EXCLUDE_STATUS:
             for i, name in enumerate(names):
+                if i > 0:
+                    logging.debug('alternate phrasings: %s\t%s', pageid, name)
                 data_list.append({
                     # ids must be unique, and the first name is the original name, which means that
                     # any subsequent names are duplicates
