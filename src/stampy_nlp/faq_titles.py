@@ -48,10 +48,18 @@ def find_duplicates(data):
     return duplicates
 
 
+def is_similar(main_title, alternative):
+    results = retriever_model.search(alternative, namespace='faq-titles', top_k=5)
+    return any(
+        item.get('metadata', {}).get('title') == main_title
+        for item in results.get('matches', [])
+    )
+
+
 def encode_faq_titles():
     """Pull FAQ from Coda, embed titles, find duplicates, then store in Pinecone DB"""
     try:
-        data = codautils.get_df_data()
+        data = codautils.get_df_data(is_similar)
         logger.debug("data.index %s", data.index[:COUNT])
     except Exception as e:
         logger.error('Failed get_df_data() reading from Coda.')

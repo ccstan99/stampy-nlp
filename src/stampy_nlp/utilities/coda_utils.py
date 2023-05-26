@@ -35,7 +35,7 @@ def fetch_all_rows():
         response = next_page and requests.get(next_page, headers=headers).json()
 
 
-def get_df_data():
+def get_df_data(is_similar = lambda n1, n2: n1 == n2):
     """Fetches questions from Coda and returns a pandas dataframe for processing"""
     logging.debug("get_df_data()")
 
@@ -55,8 +55,8 @@ def get_df_data():
         # add to data_list if some kinds of question, even if unanswered
         if len(pageid) >= 4 and status not in EXCLUDE_STATUS:
             for i, name in enumerate(names):
-                if i > 0:
-                    logging.debug('alternate phrasings: %s\t%s', pageid, name)
+                if i > 0 and is_similar(item['name'], name):
+                    logging.debug('Skipping similar alternate phrasing: %s (%s)\t%s', pageid, item['name'], name)
                 data_list.append({
                     # ids must be unique, and the first name is the original name, which means that
                     # any subsequent names are duplicates
