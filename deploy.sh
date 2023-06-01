@@ -11,7 +11,7 @@ IMAGE=$LOCATION-docker.pkg.dev/$GCLOUD_PROJECT/cloud-run-source-deploy/$CLOUD_RU
 QA_MODEL_URL=https://qa-model-$GCLOUD_PROJECT_ID-uw.a.run.app
 RETRIEVER_MODEL_URL=https://retriever-model-$GCLOUD_PROJECT_ID-uw.a.run.app
 LIT_SEARCH_MODEL_URL=https://lit-search-model-$GCLOUD_PROJECT_ID-uw.a.run.app
-export ALLOWED_ORIGINS=https://pauseai.info,https://nlp.stampy.ai,https://$CLOUD_RUN_SERVICE-t6p37v2uia-uw.a.run.app
+export ALLOWED_ORIGINS=
 
 echo "Running tests:"
 pytest --runlive
