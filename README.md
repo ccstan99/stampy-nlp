@@ -127,6 +127,14 @@ To help with local development you can set up the above model servers via docker
 This should work, but slowly. If you want faster results, consider either manually running the model that you're
 using (check the `model_server` folder for details), or provide a cloud server with the model.
 
+#### Local models
+
+Sentence transformer models can be run locally by providing the path to them, e.g.:
+
+    RETRIEVER_MODEL_URL='./model_server/models/allenai/specter/'
+
+For this to work, its dependancies must first be installed via `pip install -e '.[local_model]'`.
+
 # Deployment
 
 ## Install Google [Cloud SDK](https://cloud.google.com/sdk/docs/install)

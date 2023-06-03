@@ -90,7 +90,12 @@ def encode_faq_titles():
 
 
 if __name__ == "__main__":
+    from stampy_nlp.models import connect_pinecone
+    from stampy_nlp.utilities.pinecone_utils import get_index
+
     logging.basicConfig(level=logging.DEBUG)
+
+    connect_pinecone(get_index())
 
     if len(sys.argv) > 1 and sys.argv[1] == '-delete-all':
         logger.debug("sys.argv[1]=%s", sys.argv[1])

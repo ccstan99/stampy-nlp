@@ -6,7 +6,6 @@ from stampy_nlp.settings import (
 from stampy_nlp.logger import make_logger
 from stampy_nlp.utilities.pinecone_utils import DEFAULT_TOPK, get_index
 
-
 logger = make_logger(__name__)
 
 
@@ -14,25 +13,16 @@ class ModelConnectionError(Exception):
     pass
 
 
-class Model:
-    def __init__(self, host, model_name, pinecone=None):
-        self.host = host
+class BaseModel:
+    def __init__(self, model_name, pinecone=None):
         self.pinecone = pinecone
         self.model_name = model_name
-
-    def _post(self, endpoint, payload):
-        resp = requests.post(self.host + endpoint, json=payload)
-        if not resp.status_code == 200:
-            raise ModelConnectionError(
-                f'Could not run model: status={resp.status_code}, contents={resp.text}'
-            )
-        return resp.json()
 
     def connect_pinecone(self, pinecone):
         self.pinecone = pinecone
 
     def encode(self, query):
-        return self._post('/encoding', {'query': query})
+        raise NotImplementedError
 
     def search(self, query, namespace, top_k=DEFAULT_TOPK, includeMetadata=True, **kwargs):
         xq = self.encode(query)
@@ -61,15 +51,63 @@ class Model:
         return results
 
     def paraphrase_mining(self, titles):
+        raise NotImplementedError
+
+    def question_answering(self, question, context):
+        raise NotImplementedError
+
+
+class HttpModel(BaseModel):
+    def __init__(self, host, model_name, pinecone=None):
+        super().__init__(model_name, pinecone)
+        self.host = host
+
+    def _post(self, endpoint, payload):
+        resp = requests.post(self.host + endpoint, json=payload)
+        if not resp.status_code == 200:
+            raise ModelConnectionError(
+                f'Could not run model: status={resp.status_code}, contents={resp.text}'
+            )
+        return resp.json()
+
+    def encode(self, query):
+        return self._post('/encoding', {'query': query})
+
+    def paraphrase_mining(self, titles):
         return self._post('/paraphrase_mining', {'titles': titles})
 
     def question_answering(self, question, context):
         return self._post('/question_answering', {'query': question, 'context': context})
 
 
-qa_model = Model(QA_MODEL_URL, 'qa_model')
-retriever_model = Model(RETRIEVER_MODEL_URL, 'retriever')
-lit_search_model = Model(LIT_SEARCH_MODEL_URL, 'lit_search')
+# Handle people wanting to run models locally.
+try:
+    from sentence_transformers import SentenceTransformer, util
+
+    class SentenceTransformerModel(BaseModel):
+        def __init__(self, model_path, model_name, pinecone=None):
+            super().__init__(model_name, pinecone)
+            logger.info('Using local sentence transformer model for %s', model_name)
+            self.model = SentenceTransformer(model_path)
+
+        def encode(self, query):
+            return self.model.encode(query).tolist()
+
+except ModuleNotFoundError:
+    SentenceTransformerModel = BaseModel
+
+
+def make_model(model_uri, name):
+    if not model_uri:
+        return BaseModel(name)
+    if not model_uri.strip().startswith('http'):
+        return SentenceTransformerModel(model_uri, name)
+    return HttpModel(model_uri, name)
+
+
+qa_model = make_model(QA_MODEL_URL, 'qa_model')
+retriever_model = make_model(RETRIEVER_MODEL_URL, 'retriever')
+lit_search_model = make_model(LIT_SEARCH_MODEL_URL, 'lit_search')
 
 
 def connect_pinecone(pinecone):
