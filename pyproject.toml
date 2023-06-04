@@ -32,6 +32,9 @@ dependencies = [
 tests = [
     "pytest",
 ]
+local_model = [
+    "sentence-transformers",
+]
 
 [project.scripts]
 run_stampy_nlp = "stampy_nlp.main:run"

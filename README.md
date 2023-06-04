@@ -24,9 +24,7 @@ Encodes a given `query` string, sends the vector embedding to search pinecone fo
 
 Sample API usage:
 
-```text
-https://nlp.stampy.ai/api/search?query=What+AI+safety%3F`
-```
+    https://nlp.stampy.ai/api/search?query=What+AI+safety%3F`
 
 - `query` (required) is the sentence or phrase to be encoded then have nearest entries returned.
 - `top` (optional) indicates the number of entries returned. If the value is not specified, the default is to return the 10 nearest entries.
@@ -38,33 +36,23 @@ Sample usages:
 
 `showLive=1` returns entries where `status == "Live on site"`
 
-```bash
-https://nlp.stampy.ai/api/search?query=What+AI+safety%3F&showLive=1
-```
+    https://stampy-nlp-t6p37v2uia-uw.a.run.app/api/search?query=What+AI+safety%3F&showLive=1
 
 `showLive=0` returns entries where `status != "Live on site"`
 
-```bash
-https://nlp.stampy.ai/api/search?query=What+AI+safety%3F&showLive=0
-```
+    https://stampy-nlp-t6p37v2uia-uw.a.run.app/api/search?query=What+AI+safety%3F&showLive=0
 
 `status=all` returns all questions regardless of status
 
-```bash
-https://nlp.stampy.ai/api/search?query=Something+random%3F&status=all
-```
+    https://stampy-nlp-t6p37v2uia-uw.a.run.app/api/search?query=Something+random%3F&status=all
 
 `status=value` returns entries with status matching whatever value is specified. Multiple values may be listed separately. The example below returns entries with `status == "Not started"` and also `status == "In progress"`
 
-```bash
-https://nlp.stampy.ai/api/search?query=Something+random%3F&status=Not%20started&status=In%20progress
-```
+    https://stampy-nlp-t6p37v2uia-uw.a.run.app/api/search?query=Something+random%3F&status=Not%20started&status=In%20progress
 
 `getContent=true` returns the content of answers along with each entry.
 
-```bash
-https://nlp.stampy.ai/api/search?query=Something+random%3F&getContent=true
-```
+    https://nlp.stampy.ai/api/search?query=Something+random%3F&getContent=true
 
 ## 2. [Duplicates Report](https://nlp.stampy.ai/duplicates)
 
@@ -76,9 +64,7 @@ Encodes a given query string, sends the vector embedding to search pinecone for 
 
 Sample API usage:
 
-```bash
-https://nlp.stampy.ai/api/literature?query=What+AI+safety%3F
-```
+    https://nlp.stampy.ai/api/literature?query=What+AI+safety%3F
 
 ## 4. [Extract QA](https://nlp.stampy.ai/extract)
 
@@ -86,17 +72,13 @@ Encodes a given query string then sends the vector embedding to search pinecone 
 
 Sample API usage:
 
-```bash
-https://nlp.stampy.ai/api/extract?query=What+AI+safety%3F
-```
+    https://nlp.stampy.ai/api/extract?query=What+AI+safety%3F
 
 # Setup Environment
 
 ## Run the setup script
 
-```bash
-./setup.sh
-```
+    ./setup.sh
 
 If this is your first run, it will:
 
@@ -127,20 +109,25 @@ env variable. This is only used for that endpoint - if not set, the endpoint wil
 
 The models used are hosted separately and are provided via the following env variables:
 
-```bash
-QA_MODEL_URL=https://qa-model-t6p37v2uia-uw.a.run.app
-RETRIEVER_MODEL_URL=https://retriever-model-t6p37v2uia-uw.a.run.app
-LIT_SEARCH_MODEL_URL=https://lit-search-model-t6p37v2uia-uw.a.run.app
-```
+    QA_MODEL_URL=https://qa-model-t6p37v2uia-uw.a.run.app
+    RETRIEVER_MODEL_URL=https://retriever-model-t6p37v2uia-uw.a.run.app
+    LIT_SEARCH_MODEL_URL=https://lit-search-model-t6p37v2uia-uw.a.run.app
 
 To help with local development you can set up the above model servers via docker-compose:
 
-```bash
-docker-compose up
-```
+    docker-compose up
 
 This should work, but slowly. If you want faster results, consider either manually running the model that you're
 using (check the `model_server` folder for details), or provide a cloud server with the model.
+
+#### Local models
+
+Sentence transformer models can be run locally by providing the path to them, e.g.:
+
+    RETRIEVER_MODEL_URL=multi-qa-mpnet-base-cos-v1
+    LIT_SEARCH_MODEL_URL=allenai-specter
+
+For this to work, its dependancies must first be installed via `pip install -e '.[local_model]'`.
 
 # Deployment
 
@@ -148,20 +135,16 @@ using (check the `model_server` folder for details), or provide a cloud server w
 
 ### Linux
 
-```bash
-echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main" | sudo tee -a /etc/apt/sources.list.d/google-cloud-sdk.list
-curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key --keyring /usr/share/keyrings/cloud.google.gpg add -
-sudo apt-get update && sudo apt-get install google-cloud-cli
-gcloud init
-gcloud auth login --no-launch-browser
-```
+    echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main" | sudo tee -a /etc/apt/sources.list.d/google-cloud-sdk.list
+    curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key --keyring /usr/share/keyrings/cloud.google.gpg add -
+    sudo apt-get update && sudo apt-get install google-cloud-cli
+    gcloud init
+    gcloud auth login --no-launch-browser
 
 ### MacOS
 
-```bash
-brew install --cask google-cloud-sdk
-gcloud init
-```
+    brew install --cask google-cloud-sdk
+    gcloud init
 
 ## Setup Docker
 
@@ -174,8 +157,7 @@ and you're not on a Linux x64 system
 
 ## Deploy to Google [Cloud Run](https://cloud.google.com/sdk/gcloud/reference/beta/run/deploy)
 
-```bash
-./deploy.sh <service name>
-```
+    ./deploy.sh <service name>
 
-If no service name is provided, the script will deploy to `stampy-nlp`. Before actually doing anything, the script will ask to make sure everything is correct.
+If no service name is provided, the script will deploy to `stampy-nlp`. Before actually doing anything, the script will
+ask to make sure everything is correct.

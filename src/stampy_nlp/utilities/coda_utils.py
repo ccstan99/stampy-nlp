@@ -35,7 +35,7 @@ def fetch_all_rows():
         response = next_page and requests.get(next_page, headers=headers).json()
 
 
-def get_df_data():
+def get_df_data(is_similar = lambda n1, n2: n1 == n2, delete_all: bool = False):
     """Fetches questions from Coda and returns a pandas dataframe for processing"""
     logging.debug("get_df_data()")
 
@@ -44,7 +44,10 @@ def get_df_data():
         values = item['values']
         pageid = str(values['UI ID']).strip()
         status = values['Status']
-        names = [val for val in values.get('All Phrasings', '').split('\n') if val] or [item['name']]
+        names = [item['name']]
+        # add alternate phrasings only if db already populated, else is_similar always false
+        if not delete_all:
+            names = [val for val in values.get('All Phrasings', '').split('\n') if val] or [item['name']]
 
         # link to UI if available else use coda link
         if status == 'Live on site':
@@ -55,8 +58,9 @@ def get_df_data():
         # add to data_list if some kinds of question, even if unanswered
         if len(pageid) >= 4 and status not in EXCLUDE_STATUS:
             for i, name in enumerate(names):
-                if i > 0:
-                    logging.debug('alternate phrasings: %s\t%s', pageid, name)
+                if i > 0 and is_similar(item['name'], name):
+                    logging.info('Skipping similar alternate phrasing: %s (%s)\t%s', pageid, item['name'], name)
+                    continue
                 data_list.append({
                     # ids must be unique, and the first name is the original name, which means that
                     # any subsequent names are duplicates
