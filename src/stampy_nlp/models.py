@@ -93,6 +93,10 @@ try:
         def encode(self, query):
             return self.model.encode(query).tolist()
 
+        def paraphrase_mining(self, titles):
+            return util.paraphrase_mining(self.model, titles, show_progress_bar=True)
+
+
 except ModuleNotFoundError:
     SentenceTransformerModel = BaseModel
 

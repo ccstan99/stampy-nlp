@@ -3,7 +3,7 @@ import json
 import sys
 from google.cloud import storage
 from stampy_nlp.settings import STAMPY_BUCKET, DUPLICATES_FILENAME
-from stampy_nlp.utilities.pinecone_utils import upload_data, DEFAULT_TOPK
+from stampy_nlp.utilities.pinecone_utils import upload_data, DEFAULT_TOPK, PINECONE_NAMESPACE
 import stampy_nlp.utilities.coda_utils as codautils
 from stampy_nlp.models import retriever_model
 
@@ -49,7 +49,7 @@ def find_duplicates(data):
 
 
 def is_similar(main_title, alternative):
-    results = retriever_model.search(alternative, namespace='faq-titles', top_k=5)
+    results = retriever_model.search(alternative, namespace=PINECONE_NAMESPACE, top_k=DEFAULT_TOPK)
     return any(
         item.get('metadata', {}).get('title') == main_title
         for item in results.get('matches', [])
@@ -59,7 +59,7 @@ def is_similar(main_title, alternative):
 def encode_faq_titles():
     """Pull FAQ from Coda, embed titles, find duplicates, then store in Pinecone DB"""
     try:
-        data = codautils.get_df_data(is_similar)
+        data = codautils.get_df_data(is_similar, delete_all=delete_all)
         logger.debug("data.index %s", data.index[:COUNT])
     except Exception as e:
         logger.error('Failed get_df_data() reading from Coda.')
@@ -97,9 +97,9 @@ if __name__ == "__main__":
 
     connect_pinecone(get_index())
 
-    if len(sys.argv) > 1 and sys.argv[1] == '-delete-all':
-        logger.debug("sys.argv[1]=%s", sys.argv[1])
+    if any("-delete-all" in s for s in sys.argv):
         delete_all = True
-    logger.debug("delete_all=%s", delete_all)
+        # logger.isEnabledFor("sys.argv[1]=%s", sys.argv[1])
+    logger.info("delete_all=%s", delete_all)
 
     encode_faq_titles()

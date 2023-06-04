@@ -29,7 +29,7 @@ jobs:
       id: generate
       run: |
         cd ${{ env.FILEPATH }}
-        npm install node-fetch @tensorflow/tfjs-node@4.1.0 @tensorflow-models/universal-sentence-encoder
+        npm install
         node encode-faq.mjs ${{ secrets.CODA_TOKEN }}
 
     - name: 'Authenticate to Google Cloud'

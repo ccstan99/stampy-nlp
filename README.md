@@ -24,40 +24,35 @@ Encodes a given `query` string, sends the vector embedding to search pinecone fo
 
 Sample API usage:
 
-```text
-https://nlp.stampy.ai/api/search?query=What+AI+safety%3F`
-```
+    https://nlp.stampy.ai/api/search?query=What+AI+safety%3F`
 
 - `query` (required) is the sentence or phrase to be encoded then have nearest entries returned.
 - `top` (optional) indicates the number of entries returned. If the value is not specified, the default is to return the 10 nearest entries.
 - `showLive=0` (optional) will return only entries with `status` that are NOT "Live on site". The default is `showLive=1` to return only entries that with `status` that are "Live on site".
 - `status=all` (optional) returns all entries including those that have not yet been canonically answered. Specify multiple values for `status` to return matching more than one value.
+- `getContent=true` (optional) returns the content of answers along with each entry. Otherwise, default is `getContent=false` and only the question titles without answers are returned.
 
 Additional usages:
 
 `showLive=1` returns entries where `status == "Live on site"`
 
-```bash
-https://stampy-nlp-t6p37v2uia-uw.a.run.app/api/search?query=What+AI+safety%3F&showLive=1
-```
+    https://stampy-nlp-t6p37v2uia-uw.a.run.app/api/search?query=What+AI+safety%3F&showLive=1
 
 `showLive=0` returns entries where `status != "Live on site"`
 
-```bash
-https://stampy-nlp-t6p37v2uia-uw.a.run.app/api/search?query=What+AI+safety%3F&showLive=0
-```
+    https://stampy-nlp-t6p37v2uia-uw.a.run.app/api/search?query=What+AI+safety%3F&showLive=0
 
 `status=all` returns all questions regardless of status
 
-```bash
-https://stampy-nlp-t6p37v2uia-uw.a.run.app/api/search?query=Something+random%3F&status=all
-```
+    https://stampy-nlp-t6p37v2uia-uw.a.run.app/api/search?query=Something+random%3F&status=all
 
 `status=value` returns entries with status matching whatever value is specified. Multiple values may be listed separately. The example below returns entries with `status == "Not started"` and also `status == "In progress"`
 
-```bash
-https://stampy-nlp-t6p37v2uia-uw.a.run.app/api/search?query=Something+random%3F&status=Not%20started&status=In%20progress
-```
+    https://stampy-nlp-t6p37v2uia-uw.a.run.app/api/search?query=Something+random%3F&status=Not%20started&status=In%20progress
+
+`getContent=true` returns the content of answers along with each entry.
+
+    https://nlp.stampy.ai/api/search?query=Something+random%3F&getContent=true
 
 ## 2. [Duplicates Report](https://nlp.stampy.ai/duplicates)
 
@@ -68,20 +63,14 @@ Display a table with top pairs of most similar questions in Coda based on the la
 Encodes a given query string, sends the vector embedding to search pinecone for nearest entry in `paper-abstracts` namespace, then returns payload as json sorted by score between 0 and 1 indicating the similarity of match. In an effort to minimize the number of huge models in our app container, this service still uses the external HuggingFace API so it's still a bit slow.
 
 Sample API usage:
-
-```text
-https://nlp.stampy.ai/api/literature?query=What+AI+safety%3F
-```
+    https://nlp.stampy.ai/api/literature?query=What+AI+safety%3F
 
 ## 4. [Extract QA](https://nlp.stampy.ai/extract)
 
 Encodes a given query string then sends the vector embedding to search pinecone for the 10 nearest entries in `extracted-chunks` namespace. For each entry, run the HuggingFace pipeline task to extract the answer from each content then returns payload as json sorted by score between 0 and 1 indicating the confidence of the answer matches the query question. Since this runs +10 inferences, this can be rather slow.
 
 Sample API usage:
-
-```text
-https://nlp.stampy.ai/api/extract?query=What+AI+safety%3F
-```
+    https://nlp.stampy.ai/api/extract?query=What+AI+safety%3F
 
 # Setup Environment
 ## Run the setup script
@@ -131,7 +120,8 @@ using (check the `model_server` folder for details), or provide a cloud server w
 
 Sentence transformer models can be run locally by providing the path to them, e.g.:
 
-    RETRIEVER_MODEL_URL='./model_server/models/allenai/specter/'
+    RETRIEVER_MODEL_URL=multi-qa-mpnet-base-cos-v1
+    LIT_SEARCH_MODEL_URL=allenai-specter
 
 For this to work, its dependancies must first be installed via `pip install -e '.[local_model]'`.
 
@@ -140,16 +130,14 @@ For this to work, its dependancies must first be installed via `pip install -e '
 ## Install Google [Cloud SDK](https://cloud.google.com/sdk/docs/install)
 
 ### Linux
-```bash
-echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main" | sudo tee -a /etc/apt/sources.list.d/google-cloud-sdk.list
-curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key --keyring /usr/share/keyrings/cloud.google.gpg add -
-sudo apt-get update && sudo apt-get install google-cloud-cli
-gcloud init
-gcloud auth login --no-launch-browser
-```
+
+    echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main" | sudo tee -a /etc/apt/sources.list.d/google-cloud-sdk.list
+    curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key --keyring /usr/share/keyrings/cloud.google.gpg add -
+    sudo apt-get update && sudo apt-get install google-cloud-cli
+    gcloud init
+    gcloud auth login --no-launch-browser
 
 ### MacOS
-
     brew install --cask google-cloud-sdk
     gcloud init
 
@@ -168,38 +156,3 @@ and you're not on a Linux x64 system
 
 If no service name is provided, the script will deploy to `stampy-nlp`. Before actually doing anything, the script will
 ask to make sure everything is correct.
-
-# Files Overview
-
-`main.py` is the main Flask server that responds to API endpoints and also displays web pages demonstrating the use of API calls.
-
-Files named `encode_*.py` use the relevant model to encode the associated text then stores the results in a specific pinecone namespace that can be retrieved by the Flask server.
-
-- `encode_faq_titles.py` encodes all the question titles from the Coda, then stores into pinecone `faq-titles` namespace for later use in Semantic Search for Similar FAQs on Stampy. Also uses the SentenceTransformer utility `paraphrase_mining` to generate a JSON file with top 100 pairs of most similar questions in Coda.
-
-- `encode_extracted_chunks.py` takes alignment dataset (currently all ~1000 arxiv papers and ~2000 Alignment Forum blog posts), splits them into ~1000 word chunks split on complete sentences, encodes them, then stores into pinecone `extracted-chunks` namespace for later use in Extract QA.
-
-- `encode_lit_abstracts.py` takes all arxiv papers from alignment dataset, encodes the title + abstracts, then stored into pinecone `lit-abstracts` namespace for later use in Paper Search.
-
-# Discussion + Needs
-
-## 1. Automate Deployment
-
-Right now all this is deployed on Google Cloud Run, which allows all the dependencies to be containerized, supposedly starts up instantaneously and should scale to meet increased demand. Each of the HuggingFace NLP models are ~400 MB and we use 3 separate ones. Originally, to keep the app size small, I used the external Hugging Face API but it was very slow. This has been split up, but now there are 4 services to be managed, with more likely to appear. Something like terraform would be good to have.
-
-## 2. Keep Code Databases Synchronized
-
-Currently, a script is manually run to synchronize the list of questions in Coda to pinecone. Consider adding `/api/create` and `/api/delete` endpoints which take a Coda document id, synchronize data for the given entry in pinecone.
-
-```text
-https://nlp.stampy.ai/api/create?id=i-7dc3df6cd1e28f067c354042b0276673117624195a0adae01f83e34fbd2be652
-https://nlp.stampy.ai/api/delete?id=...
-```
-
-## 3. Keep Alignment Dataset Up-to-Date
-
-At the moment pinecone is free up to 1 million vectors, of which we are using ~40,000 vectors. It seems very responsive but there may be a price increase of we index the entire alignment literature dataset. It'd been nice to have someone who can do a cleaner parse of the [alignment dataset](https://github.com/moirage/alignment-research-dataset) and also Stampy's FAQ to extract the plain text from blogs, pdfs and other documents and keep alignment-related literature up-to-date with newly published arxiv papers and blog-posts. Also consider adding generated summaries of blog posts and treat like paper abstracts to expand paper search space.
-
-## 4. Clean Up Code
-
-Before all the above... The messy code needs to be cleaned up & refactored before getting others to contribute. I'm always open to suggestions in general!
