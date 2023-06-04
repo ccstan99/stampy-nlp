@@ -32,7 +32,7 @@ Sample API usage:
 - `status=all` (optional) returns all entries including those that have not yet been canonically answered. Specify multiple values for `status` to return matching more than one value.
 - `getContent=true` (optional) returns the content of answers along with each entry. Otherwise, default is `getContent=false` and only the question titles without answers are returned.
 
-Additional usages:
+Sample usages:
 
 `showLive=1` returns entries where `status == "Live on site"`
 
@@ -63,6 +63,7 @@ Display a table with top pairs of most similar questions in Coda based on the la
 Encodes a given query string, sends the vector embedding to search pinecone for nearest entry in `paper-abstracts` namespace, then returns payload as json sorted by score between 0 and 1 indicating the similarity of match. In an effort to minimize the number of huge models in our app container, this service still uses the external HuggingFace API so it's still a bit slow.
 
 Sample API usage:
+
     https://nlp.stampy.ai/api/literature?query=What+AI+safety%3F
 
 ## 4. [Extract QA](https://nlp.stampy.ai/extract)
@@ -70,18 +71,21 @@ Sample API usage:
 Encodes a given query string then sends the vector embedding to search pinecone for the 10 nearest entries in `extracted-chunks` namespace. For each entry, run the HuggingFace pipeline task to extract the answer from each content then returns payload as json sorted by score between 0 and 1 indicating the confidence of the answer matches the query question. Since this runs +10 inferences, this can be rather slow.
 
 Sample API usage:
+
     https://nlp.stampy.ai/api/extract?query=What+AI+safety%3F
 
 # Setup Environment
+
 ## Run the setup script
 
     ./setup.sh
 
 If this is your first run, it will:
-* download the appropriate models from Huggingface
-* write the appropriate API keys/tokens to `.env`
-* create a virtualenv
-* install all requirements
+
+- Download the appropriate models from Huggingface
+- Write the appropriate API keys/tokens to `.env`
+- Create a virtualenv
+- Install all requirements
 
 Subsequent runs will skip bits that have already been done, but it does so by simply checking whether the appropriate files exist.
 API tokens for [Coda](https://coda.io/account), [Pinecone](https://app.pinecone.io) and [OpenAI](https://platform.openai.com/account/api-keys) are required,
@@ -105,9 +109,9 @@ env variable. This is only used for that endpoint - if not set, the endpoint wil
 
 The models used are hosted separately and are provided via the following env variables:
 
-    QA_MODEL_URL=http://0.0.0.0:8125
-    RETRIEVER_MODEL_URL=http://0.0.0.0:8124
-    LIT_SEARCH_MODEL_URL=http://0.0.0.0:8126
+    QA_MODEL_URL=https://qa-model-t6p37v2uia-uw.a.run.app
+    RETRIEVER_MODEL_URL=https://retriever-model-t6p37v2uia-uw.a.run.app
+    LIT_SEARCH_MODEL_URL=https://lit-search-model-t6p37v2uia-uw.a.run.app
 
 To help with local development you can set up the above model servers via docker-compose:
 
@@ -138,6 +142,7 @@ For this to work, its dependancies must first be installed via `pip install -e '
     gcloud auth login --no-launch-browser
 
 ### MacOS
+
     brew install --cask google-cloud-sdk
     gcloud init
 
