@@ -99,7 +99,6 @@ if __name__ == "__main__":
 
     if any("-delete-all" in s for s in sys.argv):
         delete_all = True
-        # logger.isEnabledFor("sys.argv[1]=%s", sys.argv[1])
     logger.info("delete_all=%s", delete_all)
 
     encode_faq_titles()

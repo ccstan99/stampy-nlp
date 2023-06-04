@@ -46,7 +46,7 @@ def upload_data(ids, vectors, meta, namespace: str = PINECONE_NAMESPACE, delete_
     length = len(ids)
     logging.info(f"upload_data {length}")
     for i in range(0, length, batch_size):
-        logging.info(f"upsert: {PINECONE_NAMESPACE} {i} {i+batch_size}")
+        logging.debug(f"upsert: {PINECONE_NAMESPACE} {i} {i+batch_size}")
         index.upsert(
             list(zip(ids[i:i+batch_size],
                  vectors[i:i+batch_size], meta[i:i+batch_size])),
