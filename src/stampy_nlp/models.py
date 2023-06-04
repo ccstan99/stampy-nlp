@@ -96,7 +96,7 @@ try:
         def paraphrase_mining(self, titles):
             return util.paraphrase_mining(self.model, titles, show_progress_bar=True)
 
-
+    logger.info('Loaded local model')
 except ModuleNotFoundError:
     SentenceTransformerModel = BaseModel
 

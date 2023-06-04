@@ -60,16 +60,16 @@ def get_df_data(is_similar = lambda n1, n2: n1 == n2, delete_all: bool = False):
             for i, name in enumerate(names):
                 if i > 0 and is_similar(item['name'], name):
                     logging.info('Skipping similar alternate phrasing: %s (%s)\t%s', pageid, item['name'], name)
-                else:
-                    data_list.append({
-                        # ids must be unique, and the first name is the original name, which means that
-                        # any subsequent names are duplicates
-                        'id': f'{item["id"]}{i or ""}',
-                        'title': name,
-                        'status': status,
-                        'pageid': pageid,
-                        'url': url,
-                    })
+                    continue
+                data_list.append({
+                    # ids must be unique, and the first name is the original name, which means that
+                    # any subsequent names are duplicates
+                    'id': f'{item["id"]}{i or ""}',
+                    'title': name,
+                    'status': status,
+                    'pageid': pageid,
+                    'url': url,
+                })
 
     df = pd.DataFrame(data_list)
     df.set_index('id', inplace=True)
