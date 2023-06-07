@@ -109,22 +109,22 @@ let processAllRows = async () => {
         console.log(`${prevNumQs} questions from in previous generated encodings.`);
     }
 
-    let items = await getCodaRows(url);
+    const items = await getCodaRows(url);
 
     console.log(`${items.length} questions fetched from ${url}.`);
 
     const model = await use.load();
     console.log(`Tensorflow's universal sentence encoder model loaded.`);
 
-    let isDuplicate = await compareQuestions(items, model);
+    const isDuplicate = await compareQuestions(items, model);
     const alternativePhrasings = await getAlternativePhrasings(items, isDuplicate);
-    let allItems = items.concat(alternativePhrasings);
+    const allItems = items.concat(alternativePhrasings);
 
     let { encodings, questions, pageids } = await embedItems(model, allItems);
-    let encoded = await encodings.arraySync();
+    encodings = await encodings.arraySync();
 
     console.log(`${allItems.length} questions encoded (${items.length} questions, ${alternativePhrasings.length} alternative phrasings).`);
-    let data = JSON.stringify({ numQs: questions.length, questions, pageids, encoded});
+    let data = JSON.stringify({ numQs: questions.length, questions, pageids, encodings});
     fs.writeFile(filename, data, (err) => {
         if (err) {
             console.error(err);
