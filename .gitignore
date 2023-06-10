@@ -14,4 +14,4 @@ venv
 *.egg-info/
 build/
 data/
-faq_titles_local.py
+*.tsv

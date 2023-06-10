@@ -25,7 +25,7 @@ def fetch_all_rows():
     headers: object = {'Authorization': f'Bearer {get_coda_token()}'}
     params: object = {
         'useColumnNames': True,
-        'limit': 1000
+        'limit': 10000
     }
     response = requests.get(TABLE_URL, headers=headers, params=params).json()
     while response:
@@ -40,6 +40,7 @@ def get_df_data(is_similar = lambda n1, n2: n1 == n2, delete_all: bool = False):
     logging.debug("get_df_data()")
 
     data_list = []
+    similar_alternates = []
     for item in fetch_all_rows():
         values = item['values']
         pageid = str(values['UI ID']).strip()
@@ -60,6 +61,11 @@ def get_df_data(is_similar = lambda n1, n2: n1 == n2, delete_all: bool = False):
             for i, name in enumerate(names):
                 if i > 0 and is_similar(item['name'], name):
                     logging.info('Skipping similar alternate phrasing: %s (%s)\t%s', pageid, item['name'], name)
+                    similar_alternates.append({
+                        'pageid': pageid, 
+                        'original question':item['name'], 
+                        'alternate phrasing':name
+                    })
                     continue
                 data_list.append({
                     # ids must be unique, and the first name is the original name, which means that
@@ -71,6 +77,8 @@ def get_df_data(is_similar = lambda n1, n2: n1 == n2, delete_all: bool = False):
                     'url': url,
                 })
 
+    df_similar = pd.DataFrame(similar_alternates)
+    df_similar.to_csv("similar_alternates.tsv", sep='\t', index=False)
     df = pd.DataFrame(data_list)
     df.set_index('id', inplace=True)
     return df
