@@ -24,8 +24,7 @@ RICH_TEXT_COLUMN = 'c-a82d-vxRc9'
 def fetch_all_rows():
     headers: object = {'Authorization': f'Bearer {get_coda_token()}'}
     params: object = {
-        'useColumnNames': True,
-        'limit': 10000
+        'useColumnNames': True
     }
     response = requests.get(TABLE_URL, headers=headers, params=params).json()
     while response:
