@@ -3,7 +3,7 @@ set -e
 
 if [[ "$@" == *"-local"* ]]; then
     source venv/bin/activate
-    pip install -e '.[local_model]'
+    pip install -q -e '.[local_model]'
     RETRIEVER_MODEL_URL=multi-qa-mpnet-base-cos-v1 python src/stampy_nlp/faq_titles.py $@
 else
     if [ -z "${AUTH_PASSWORD}" ]; then
