@@ -10,8 +10,18 @@
     {% extends "template.html" %}
     {% block content %}
     <div style="width:100%; padding:5px" >
-  
-    <h2 id="title">Semantic Search for Similar FAQs</h2>
+
+    <div class="search-header">
+        <h2 id="title">Semantic Search for Similar FAQs</h2>
+        <span>
+            <input type="checkbox" id="all" name="status" value="All" class="status-input">
+            <label for="all" class="status-label">All</label>
+            <input type="checkbox" id="live" name="live" value="Live on site" class="status-input">
+            <label for="live" class="status-label">Live</label>
+            <input type="checkbox" id="in_progress" name="in_progress" value="In progress" class="status-input">
+            <label for="in_progress" class="status-label">In progress</label>
+        </span>
+    </div>
     <p id="status"></p>
       <input type="search" id="query" name="question" value="{{ query }}">
       <div id="results" class="dropdown-content show">
@@ -20,7 +30,7 @@
         {% endfor %}
       </div>
     </div>
-  
+
     </body>
     <script>
       const TITLE = document.getElementById('title');
@@ -31,12 +41,17 @@
       const QUERY_URL = "/api/search?status=all&query="
 
       QUERY.addEventListener('keyup', search);
+      Array.from(document.getElementsByClassName('status-input')).forEach(e => e.addEventListener('change', search))
 
-      async function search()
-      {
+      async function search() {
         STATUS.innerText = "";
-        
-        apicall = QUERY_URL + encodeURIComponent(QUERY.value);
+
+        const statusParams = Array.from(document.getElementsByClassName('status-input'))
+             .filter(e => e.checked)
+             .map(e => 'status=' + encodeURIComponent(e.value))
+             .join('&')
+
+        apicall = QUERY_URL + encodeURIComponent(QUERY.value) + (statusParams !== "" ? '&' + statusParams : '');
         console.log("get:", apicall);
         let f = await fetch(apicall);
         let text = await f.text();
@@ -45,12 +60,10 @@
 
         let k = 5
         // print top k results
-        for (let i = 0; i < k; i++)
-        {
-          ANCHORS[i].href = response[i]["url"]
-          ANCHORS[i].innerHTML =
-          `(${response[i]["score"].toFixed(2)}) ${response[i]["title"]}`
-        }
+        response.slice(0, k).forEach((res, i) => {
+            ANCHORS[i].href = res["url"]
+            ANCHORS[i].innerHTML = `(${res["score"].toFixed(2)}) ${res["title"]}`
+        })
       }
     </script>
     {% endblock %}

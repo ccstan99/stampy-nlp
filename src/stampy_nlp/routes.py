@@ -83,8 +83,9 @@ frontend = Blueprint('frontend', __name__, template_folder='templates')
 @log_queries
 def search_html():
     logger.debug('search_html()')
-    query = DEFAULT_QUERY
-    return render_template('search.html', query=query, results=semantic_search(query))
+    args = request.args or {}
+    query = args.get('query') or DEFAULT_QUERY
+    return render_template('search.html', query=query, results=semantic_search(query), status=args.get('status'))
 
 
 @frontend.route('/duplicates')
@@ -126,7 +127,7 @@ def search_api():
     query = request.args.get('query', DEFAULT_QUERY)
     top_k = as_int('top', DEFAULT_TOPK)
     status = request.args.getlist('status')
-    show_live = as_bool('showLive', 'true')
+    show_live = as_bool('showLive', str(not status))
     get_content = as_bool('getContent', 'false')
 
     return jsonify(semantic_search(query, top_k=top_k, showLive=show_live, status=status, get_content=get_content))
