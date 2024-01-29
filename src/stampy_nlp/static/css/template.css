@@ -182,3 +182,18 @@ tr:hover {
   background: khaki;
 }
 
+.search-header {
+    display: flex;
+}
+.search-header h2 {
+    flex: content;
+    display: inline-block;
+    margin-right: 20px;
+}
+.search-header .status-input {
+    display: inline;
+    margin-left: 10px;
+}
+.search-header .status-label {
+    display: inline;
+}
